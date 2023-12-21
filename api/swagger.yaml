@@ -1,0 +1,5167 @@
+openapi: 3.0.1
+info:
+  title: Juspay Router - API Documentation
+  description: |
+    ## Get started
+    Juspay Router provides a collection of APIs that enable you to process and manage payments. Our APIs accept and return JSON in the HTTP body, and return standard HTTP response codes</a>.
+    You can consume the APIs directly using your favorite HTTP/REST library.
+    We have a testing environment referred to "sandbox", which you can setup to test API calls without affecting production data.
+    ### Base URLs
+    Use the following base URLs when making requests to the APIs:
+
+      | Environment   |      Base URL                                        |
+      |---------------|------------------------------------------------------|
+      | Sandbox       | <https://sandbox.hyperswitch.io>                   |
+      | Production    | <https://router.juspay.io>                           |
+
+    # Authentication
+    When you sign up on our [dashboard](https://app.hyperswitch.io) and create a merchant account, you are given a secret key (also referred as api-key). You may authenticate all API requests with Juspay server by providing the appropriate key in the request Authorization header.
+    Never share your secret api keys. Keep them guarded and secure.
+  termsOfService: https://www.juspay.io/terms
+  contact:
+    name: Juspay Support
+    url: https://juspay.io
+    email: support@juspay.in
+  version: "0.2"
+  x-logo:
+    url: https://fresheropenings.com/wp-content/uploads/2019/09/Juspay-off-campus-drive-2019.png
+    altText: Juspay logo
+servers:
+- url: https://sandbox.hyperswitch.io
+  description: Sandbox Environment
+- url: https://router.juspay.io
+  description: Production Environment
+security:
+- ApiSecretKey: []
+tags:
+- name: QuickStart
+  description: Quickly get started with our API suite.
+- name: Payments
+  description: Process and manage payments across wide range of payment processors
+    using the Unified Payments API.
+- name: Customers
+  description: Create a Customer entity which you can use to store and retrieve specific
+    customers' data and payment methods.
+- name: PaymentMethods
+- name: Refunds
+- name: Mandates
+- name: MerchantAccounts
+- name: PaymentConnectors
+paths:
+  /accounts:
+    post:
+      tags:
+      - MerchantAccounts
+      - QuickStart
+      summary: Merchant Account - Create
+      description: Create a new account for a merchant. The merchant could be a seller
+        or retailer or client who likes to receive and send payments.
+      operationId: createMerchantAccount
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MerchantAccountCreateRequest'
+      responses:
+        "200":
+          description: Merchant Account Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MerchantAccountResponse'
+        "400":
+          description: Invalid data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_data
+                  message: merchant_name can't be empty or null
+        "401":
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_api_authentication
+                  message: "Access forbidden, invalid api-key was used"
+      security:
+      - AdminSecretKey: []
+  /accounts/{id}:
+    get:
+      tags:
+      - MerchantAccounts
+      summary: Merchant Account - Retrieve
+      description: Retrieve a merchant account details.
+      operationId: retrieveMerchantAccount
+      parameters:
+      - name: id
+        in: path
+        description: The unique identifier for the merchant account
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Merchant Account retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MerchantAccountResponse'
+        "404":
+          description: Merchant Account does not exist in records
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: object_not_found
+                  code: merchant_account_not_found
+                  message: Merchant Account does not exist in records
+        "401":
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_api_authentication
+                  message: "Access forbidden, invalid api-key was used"
+      security:
+      - AdminSecretKey: []
+    post:
+      tags:
+      - MerchantAccounts
+      summary: Merchant Account - Update
+      description: "To update an existing merchant account. Helpful in updating merchant\
+        \ details such as email, contact details, or other configuration details like\
+        \ webhook, routing algorithm etc"
+      operationId: updateMerchantAccount
+      parameters:
+      - name: id
+        in: path
+        description: The unique identifier for the merchant account
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MerchantAccountUpdateRequest'
+      responses:
+        "200":
+          description: Merchant Account Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MerchantAccountResponse'
+        "404":
+          description: Merchant Account does not exist in records
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: object_not_found
+                  code: merchant_account_not_found
+                  message: Merchant Account does not exist in records
+        "400":
+          description: Invalid data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_data
+                  message: Update Field can't be empty
+        "401":
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_api_authentication
+                  message: "Access forbidden, invalid api-key was used"
+      security:
+      - AdminSecretKey: []
+    delete:
+      tags:
+      - MerchantAccounts
+      summary: Merchant Account - Delete
+      description: Delete a Merchant Account
+      operationId: deleteMerchantAccount
+      parameters:
+      - name: id
+        in: path
+        description: The unique identifier for the merchant account
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Merchant Account deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MerchantAccountDeleteResponse'
+        "404":
+          description: Merchant Account does not exist in records
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: object_not_found
+                  code: merchant_account_not_found
+                  message: Merchant Account does not exist in records
+        "401":
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_api_authentication
+                  message: "Access forbidden, invalid api-key was used"
+      security:
+      - AdminSecretKey: []
+  /customers/{customer_id}/mandates:
+    get:
+      tags:
+      - Mandates
+      summary: Mandate - List all mandates against a customer id
+      description: To list the all the mandates for a customer
+      operationId: listMandateDetails
+      parameters:
+      - name: customer_id
+        in: path
+        description: Unique customer id for which the list of mandates to be retrieved.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Customer's mandates retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MandateListResponse'
+                x-content-type: application/json
+        "404":
+          description: Payment does not exist in records
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: object_not_found
+                  code: payment_not_found
+                  message: Payment does not exist in records
+        "400":
+          description: Invalid data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_data
+                  message: "Amount shall be passed as: <expected_data_type>"
+        "401":
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_api_authentication
+                  message: "Access forbidden, invalid api-key was used"
+  /customers/{customer_id}/payment_methods:
+    get:
+      tags:
+      - PaymentMethods
+      summary: List payment methods for a Customer
+      description: To filter and list the applicable payment methods for a particular
+        Customer ID
+      operationId: listPaymentMethodsByCustomerId
+      parameters:
+      - name: accepted_country
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            maxLength: 2
+            minLength: 2
+            type: string
+            description: |
+              The two-letter ISO currency code
+            example: "[\"US\",\"UK\",\"IN\"]"
+      - name: accepted_currency
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
+            description: |
+              The three-letter ISO currency code
+            example: "[\"USD\",\"EUR\"]"
+      - name: minimum_amount
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          description: |
+            The minimum amount accepted for processing by the particular payment method.
+          example: 100
+      - name: maximum_amount
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          description: |
+            The minimum amount accepted for processing by the particular payment method.
+          example: 10000000
+      - name: recurring_payment_enabled
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
+          description: Indicates whether the payment method is eligible for recurring
+            payments
+          example: true
+      - name: installment_payment_enabled
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
+          description: Indicates whether the payment method is eligible for installment
+            payments
+          example: true
+      responses:
+        "200":
+          description: Payment Methods retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerPaymentMethods'
+        "404":
+          description: Payment Methods does not exist in records
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: object_not_found
+                  code: payment_method_not_found
+                  message: Payment Methods does not exist in records
+        "400":
+          description: Invalid data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_data
+                  message: "accepted_currency shall be passed as: <expected_data_type>"
+        "401":
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_api_authentication
+                  message: "Access forbidden, invalid api-key was used"
+      security:
+      - ApiSecretKey: []
+  /mandates/{id}:
+    get:
+      tags:
+      - Mandates
+      summary: Mandate - List details of a mandate
+      description: To list the details of a mandate
+      operationId: listMandateDetails
+      parameters:
+      - name: id
+        in: path
+        description: Unique mandate id
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Mandate retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MandateListResponse'
+        "404":
+          description: Mandate does not exist in records
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: object_not_found
+                  code: payment_not_found
+                  message: Payment does not exist in records
+        "401":
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_api_authentication
+                  message: "Access forbidden, invalid api-key was used"
+  /mandates/{id}/revoke:
+    post:
+      tags:
+      - Mandates
+      summary: Mandate - Revoke a mandate
+      description: To revoke a mandate registered against a customer
+      operationId: revokeMandateDetails
+      parameters:
+      - name: id
+        in: path
+        description: Unique mandate id
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Mandate Revoked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+        "404":
+          description: Mandate does not exist in records
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: object_not_found
+                  code: payment_not_found
+                  message: Payment does not exist in records
+        "400":
+          description: Invalid data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_data
+                  message: "command shall be passed as: <expected_data_type>"
+        "401":
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_api_authentication
+                  message: "Access forbidden, invalid api-key was used"
+  /account/{account_id}/connectors:
+    post:
+      tags:
+      - PaymentConnectors
+      - QuickStart
+      summary: Payment Connector - Create
+      description: Create a new Payment Connector for the merchant account. The connector
+        could be a payment processor / facilitator / acquirer or specialized services
+        like Fraud / Accounting etc.
+      operationId: createPaymentConnector
+      parameters:
+      - name: account_id
+        in: path
+        description: The unique identifier for the merchant account
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentConnectorCreateRequest'
+      responses:
+        "200":
+          description: Payment Connector Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentConnectorResponse'
+        "400":
+          description: Invalid data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_data
+                  message: connector_name can't be empty or null
+        "401":
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_api_authentication
+                  message: "Access forbidden, invalid api-key was used"
+      security:
+      - AdminSecretKey: []
+  /account/{account_id}/connectors/{connector_id}:
+    get:
+      tags:
+      - PaymentConnectors
+      summary: Payment Connector - Retrieve
+      description: Retrieve Payment Connector details.
+      operationId: retrievePaymentConnector
+      parameters:
+      - name: account_id
+        in: path
+        description: The unique identifier for the merchant account
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: connector_id
+        in: path
+        description: The unique identifier for the payment connector
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Payment Connector retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentConnectorResponse'
+        "404":
+          description: Payment Connector does not exist in records
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: object_not_found
+                  code: payment_connector_not_found
+                  message: Payment Connector does not exist in records
+        "401":
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_api_authentication
+                  message: "Access forbidden, invalid api-key was used"
+      security:
+      - AdminSecretKey: []
+    post:
+      tags:
+      - PaymentConnectors
+      summary: Payment Connector - Update
+      description: To update an existing Payment Connector. Helpful in enabling /
+        disabling different payment methods and other settings for the connector etc
+      operationId: updatePaymentConnector
+      parameters:
+      - name: id1
+        in: path
+        description: The unique identifier for the merchant account
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: id2
+        in: path
+        description: The unique identifier for the payment connector
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentConnectorUpdateRequest'
+      responses:
+        "200":
+          description: Payment Connector Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentConnectorResponse'
+        "404":
+          description: Payment Connector does not exist in records
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: object_not_found
+                  code: payment_connector_not_found
+                  message: Payment Connector does not exist in records
+        "400":
+          description: Invalid data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_data
+                  message: Update Field can't be empty
+        "401":
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_api_authentication
+                  message: "Access forbidden, invalid api-key was used"
+      security:
+      - AdminSecretKey: []
+    delete:
+      tags:
+      - PaymentConnectors
+      summary: Payment Connector - Delete
+      description: Delete or Detach a Payment Connector from Merchant Account
+      operationId: deletePaymentConnector
+      parameters:
+      - name: id1
+        in: path
+        description: The unique identifier for the merchant account
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: id2
+        in: path
+        description: The unique identifier for the payment connector
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Payment Connector detached successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentConnectorDeleteResponse'
+        "404":
+          description: Payment Connector does not exist in records
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: object_not_found
+                  code: payment_connector_not_found
+                  message: Payment Connector does not exist in records
+        "401":
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_api_authentication
+                  message: "Access forbidden, invalid api-key was used"
+      security:
+      - AdminSecretKey: []
+  /customers:
+    post:
+      tags:
+      - Customers
+      summary: Create Customer
+      description: "Create a customer object and store the customer details to be\
+        \ reused for future payments. Incase the customer already exists in the system,\
+        \ this API will respond with the customer details."
+      operationId: createCustomer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerCreateRequest'
+            example:
+              customer_id: cus_udst2tfldj6upmye2reztkmm4i
+              email: guest@example.com
+              name: John Doe
+              phone: "999999999"
+              phone_country_code: "+65"
+              description: First customer
+              address:
+                city: Bangalore
+                country: IN
+                line1: Juspay router
+                line2: Koramangala
+                line3: Stallion
+                state: Karnataka
+                zip: "560095"
+                first_name: John
+                last_name: Doe
+              metadata:
+                udf1: value1
+                new_customer: "true"
+                login_date: 2019-09-10T10:11:12Z
+        required: true
+      responses:
+        "200":
+          description: Customer created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerCreateResponse'
+              example:
+                customer_id: cus_udst2tfldj6upmye2reztkmm4i
+                email: guest@example.com
+                name: John Doe
+                phone: "999999999"
+                phone_country_code: "+65"
+                description: First customer
+                address:
+                  city: Bangalore
+                  country: IN
+                  line1: Juspay router
+                  line2: Koramangala
+                  line3: Stallion
+                  state: Karnataka
+                  zip: "560095"
+                  first_name: John
+                  last_name: Doe
+                metadata:
+                  udf1: value1
+                  new_customer: "true"
+                  login_date: 2019-09-10T10:11:12Z
+        "401":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_api_authentication
+                  message: "Access forbidden, invalid api-key was used"
+  /customers/{id}:
+    get:
+      tags:
+      - Customers
+      summary: Retrieve Customer
+      description: Retrieve a customer's details.
+      operationId: retrieveCustomer
+      parameters:
+      - name: id
+        in: path
+        description: unique customer id
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Customer retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerCreateResponse'
+              example:
+                customer_id: cus_udst2tfldj6upmye2reztkmm4i
+                email: guest@example.com
+                name: John Doe
+                phone: "999999999"
+                phone_country_code: "+65"
+                description: First customer
+                address:
+                  city: Bangalore
+                  country: IN
+                  line1: Juspay router
+                  line2: Koramangala
+                  line3: Stallion
+                  state: Karnataka
+                  zip: "560095"
+                  first_name: John
+                  last_name: Doe
+                metadata:
+                  udf1: value1
+                  new_customer: "true"
+                  login_date: 2019-09-10T10:11:12Z
+        "404":
+          description: Customer does not exist in records
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: object_not_found
+                  code: customer_not_found
+                  message: Customer does not exist in records
+        "401":
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_api_authentication
+                  message: "Access forbidden, invalid api-key was used"
+    post:
+      tags:
+      - Customers
+      summary: Update Customer
+      description: Updates the customer's details in a customer object.
+      operationId: updateCustomer
+      parameters:
+      - name: id
+        in: path
+        description: unique customer id
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerUpdateRequest'
+        required: true
+      responses:
+        "200":
+          description: Customer created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerCreateResponse'
+        "404":
+          description: Customer does not exist in records
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: object_not_found
+                  code: customer_not_found
+                  message: Customer does not exist in records
+        "401":
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_api_authentication
+                  message: "Access forbidden, invalid api-key was used"
+    delete:
+      tags:
+      - Customers
+      summary: Delete Customer
+      description: Delete a customer record.
+      operationId: deleteCustomer
+      parameters:
+      - name: id
+        in: path
+        description: unique customer id
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Customer deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerDeleteResponse'
+        "404":
+          description: Customer does not exist in records
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: object_not_found
+                  code: customer_not_found
+                  message: Customer does not exist in records
+        "401":
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_api_authentication
+                  message: "Access forbidden, invalid api-key was used"
+  /payments:
+    post:
+      tags:
+      - Payments
+      - QuickStart
+      summary: Payments - Create
+      description: "To process a payment you will have to create a payment, attach\
+        \ a payment method and confirm. Depending on the user journey you wish to\
+        \ achieve, you may opt to all the steps in a single request or in a sequence\
+        \ of API request using following APIs: (i) Payments - Update, (ii) Payments\
+        \ - Confirm, and (iii) Payments - Capture"
+      operationId: createPayment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/payments_body'
+      responses:
+        "200":
+          description: Payment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_1'
+        "400":
+          description: Missing Mandatory fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: parameter_missing
+                  message: "Missing required param: <parameter_name>"
+        "401":
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_api_authentication
+                  message: "Access forbidden, invalid api-key was used"
+  /payments/{id}:
+    get:
+      tags:
+      - Payments
+      - QuickStart
+      summary: Payments - Retrieve
+      description: To retrieve the properties of a Payment. This may be used to get
+        the status of a previously initiated payment or next action for an ongoing
+        payment
+      operationId: retrievePayment
+      parameters:
+      - name: id
+        in: path
+        description: unique payment id
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Payment retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentsCreateResponse'
+              example:
+                payment_id: pay_mbabizu24mvu3mela5njyhpit4
+                amount: 6540
+                currency: USD
+                status: requires_customer_action
+                merchant_id: juspay_merchant
+                capture_method: automatic
+                capture_on: 2022-09-10T10:11:12Z
+                amount_to_capture: 6540
+                amount_capturable: 6540
+                customer_id: cus_udst2tfldj6upmye2reztkmm4i
+                email: guest@example.com
+                name: John Doe
+                phone: "999999999"
+                phone_country_code: "+65"
+                description: Its my first payment request
+                return_url: http://example.com/payments
+                setup_future_usage: optional
+                authentication_type: no_three_ds
+                shipping:
+                  city: Bangalore
+                  country: IN
+                  line1: Juspay router
+                  line2: Koramangala
+                  line3: Stallion
+                  state: Karnataka
+                  zip: "560095"
+                  first_name: John
+                  last_name: Doe
+                billing:
+                  city: Bangalore
+                  country: IN
+                  line1: Juspay router
+                  line2: Koramangala
+                  line3: Stallion
+                  state: Karnataka
+                  zip: "560095"
+                  first_name: John
+                  last_name: Doe
+                next_action:
+                  type: redirect_to_url
+                  redirect_to_url: https://pg-redirect-page.com
+                metadata:
+                  udf1: value1
+                  new_customer: "true"
+                  login_date: 2019-09-10T10:11:12Z
+        "404":
+          description: Payment does not exist in records
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: object_not_found
+                  code: payment_not_found
+                  message: Payment does not exist in records
+        "401":
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_api_authentication
+                  message: "Access forbidden, invalid api-key was used"
+    post:
+      tags:
+      - Payments
+      summary: Payments - Update
+      description: "To update the properties of a PaymentIntent object. This may include\
+        \ attaching a payment method, or attaching customer object or metadata fields\
+        \ after the Payment is created "
+      operationId: updatePayment
+      parameters:
+      - name: id
+        in: path
+        description: unique payment id
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentsUpdateRequest'
+            example:
+              amount: 6540
+              currency: USD
+              capture_method: automatic
+              capture_on: 2022-09-10T10:11:12Z
+              amount_to_capture: 6540
+              amount_capturable: 6540
+              customer_id: cus_udst2tfldj6upmye2reztkmm4i
+              email: guest@example.com
+              name: John Doe
+              phone: "999999999"
+              phone_country_code: "+65"
+              description: Its my first payment request
+              setup_future_usage: optional
+              authentication_type: no_three_ds
+              payment_method: card
+              save_payment_method: true
+              payment_method_data:
+                card:
+                  card_number: "4242424242424242"
+                  card_exp_month: "10"
+                  card_exp_year: "35"
+                  card_holder_name: John Doe
+                  card_cvc: "123"
+              statement_descriptor_name: Juspay
+              statement_descriptor_suffix: Router
+              shipping:
+                city: Bangalore
+                country: IN
+                line1: Juspay router
+                line2: Koramangala
+                line3: Stallion
+                state: Karnataka
+                zip: "560095"
+                first_name: John
+                last_name: Doe
+              billing:
+                city: Bangalore
+                country: IN
+                line1: Juspay router
+                line2: Koramangala
+                line3: Stallion
+                state: Karnataka
+                zip: "560095"
+                first_name: John
+                last_name: Doe
+              metadata:
+                udf1: value1
+                new_customer: "true"
+                login_date: 2019-09-10T10:11:12Z
+      responses:
+        "200":
+          description: Payment updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentsCreateResponse'
+              example:
+                payment_id: pay_mbabizu24mvu3mela5njyhpit4
+                amount: 6540
+                currency: USD
+                status: requires_customer_action
+                merchant_id: juspay_merchant
+                capture_method: automatic
+                capture_on: 2022-09-10T10:11:12Z
+                amount_to_capture: 6540
+                amount_capturable: 6540
+                amount_received: 0
+                customer_id: cus_udst2tfldj6upmye2reztkmm4i
+                email: guest@example.com
+                name: John Doe
+                phone: "999999999"
+                phone_country_code: "+65"
+                description: Its my first payment request
+                return_url: http://example.com/payments
+                setup_future_usage: optional
+                authentication_type: no_three_ds
+                shipping:
+                  city: Bangalore
+                  country: IN
+                  line1: Juspay router
+                  line2: Koramangala
+                  line3: Stallion
+                  state: Karnataka
+                  zip: "560095"
+                  first_name: John
+                  last_name: Doe
+                billing:
+                  city: Bangalore
+                  country: IN
+                  line1: Juspay router
+                  line2: Koramangala
+                  line3: Stallion
+                  state: Karnataka
+                  zip: "560095"
+                  first_name: John
+                  last_name: Doe
+                next_action:
+                  type: redirect_to_url
+                  redirect_to_url: https://pg-redirect-page.com
+                metadata:
+                  udf1: value1
+                  new_customer: "true"
+                  login_date: 2019-09-10T10:11:12Z
+        "404":
+          description: Payment does not exist in records
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: object_not_found
+                  code: payment_not_found
+                  message: Payment does not exist in records
+        "400":
+          description: Invalid data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_data
+                  message: "Amount shall be passed as: <expected_data_type>"
+        "401":
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_api_authentication
+                  message: "Access forbidden, invalid api-key was used"
+  /payments/{id}/capture:
+    post:
+      tags:
+      - Payments
+      summary: Payments - Capture
+      description: To capture the funds for an uncaptured payment
+      operationId: capturePayment
+      parameters:
+      - name: id
+        in: path
+        description: unique payment id
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentsCaptureRequest'
+            example:
+              amount_to_capture: 6540
+              statement_descriptor_name: Juspay
+              statement_descriptor_suffix: Router
+      responses:
+        "200":
+          description: Payment captured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentsCreateResponse'
+              example:
+                payment_id: pay_mbabizu24mvu3mela5njyhpit4
+                amount: 6540
+                currency: USD
+                status: succeeded
+                merchant_id: juspay_merchant
+                capture_method: automatic
+                capture_on: 2022-09-10T10:11:12Z
+                amount_to_capture: 6540
+                amount_capturable: 0
+                customer_id: cus_udst2tfldj6upmye2reztkmm4i
+                email: guest@example.com
+                name: John Doe
+                phone: "999999999"
+                phone_country_code: "+65"
+                description: Its my first payment request
+                return_url: http://example.com/payments
+                setup_future_usage: optional
+                authentication_type: no_three_ds
+                shipping:
+                  city: Bangalore
+                  country: IN
+                  line1: Juspay router
+                  line2: Koramangala
+                  line3: Stallion
+                  state: Karnataka
+                  zip: "560095"
+                  first_name: John
+                  last_name: Doe
+                billing:
+                  city: Bangalore
+                  country: IN
+                  line1: Juspay router
+                  line2: Koramangala
+                  line3: Stallion
+                  state: Karnataka
+                  zip: "560095"
+                  first_name: John
+                  last_name: Doe
+                next_action: null
+                metadata:
+                  udf1: value1
+                  new_customer: "true"
+                  login_date: 2019-09-10T10:11:12Z
+        "404":
+          description: Payment does not exist in records
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: object_not_found
+                  code: payment_not_found
+                  message: Payment does not exist in records
+        "400":
+          description: Invalid data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_data
+                  message: "Amount shall be passed as: <expected_data_type>"
+        "401":
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_api_authentication
+                  message: "Access forbidden, invalid api-key was used"
+  /payments/{id}/confirm:
+    post:
+      tags:
+      - Payments
+      summary: Payments - Confirm
+      description: This API is to confirm the payment request and forward payment
+        to the payment processor. This API provides more granular control upon when
+        the API is forwarded to the payment processor. Alternatively you can confirm
+        the payment within the Payments-Create API
+      operationId: confirmPayment
+      parameters:
+      - name: id
+        in: path
+        description: unique payment id
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentsConfirmRequest'
+            example:
+              return_url: http://example.com/payments
+              setup_future_usage: optional
+              authentication_type: no_three_ds
+              payment_method: card
+              save_payment_method: true
+              payment_method_data:
+                card:
+                  card_number: "4242424242424242"
+                  card_exp_month: "10"
+                  card_exp_year: "35"
+                  card_holder_name: John Doe
+                  card_cvc: "123"
+              shipping:
+                city: Bangalore
+                country: IN
+                line1: Juspay router
+                line2: Koramangala
+                line3: Stallion
+                state: Karnataka
+                zip: "560095"
+                first_name: John
+                last_name: Doe
+              billing:
+                city: Bangalore
+                country: IN
+                line1: Juspay router
+                line2: Koramangala
+                line3: Stallion
+                state: Karnataka
+                zip: "560095"
+                first_name: John
+                last_name: Doe
+      responses:
+        "200":
+          description: Payment confirmed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentsCreateResponse'
+              example:
+                amount: 6540
+                currency: USD
+                confirm: true
+                payment_id: pay_mbabizu24mvu3mela5njyhpit4
+                merchant_id: juspay_merchant
+                capture_method: automatic
+                capture_on: 2022-09-10T10:11:12Z
+                amount_to_capture: 6540
+                customer_id: cus_udst2tfldj6upmye2reztkmm4i
+                email: guest@example.com
+                name: John Doe
+                phone: "999999999"
+                phone_country_code: "+65"
+                description: Its my first payment request
+                return_url: http://example.com/payments
+                setup_future_usage: optional
+                authentication_type: no_three_ds
+                payment_method: card
+                save_payment_method: true
+                payment_method_data:
+                  card:
+                    card_number: "4242424242424242"
+                    card_exp_month: "10"
+                    card_exp_year: "35"
+                    card_holder_name: John Doe
+                    card_cvc: "123"
+                statement_descriptor_name: Juspay
+                statement_descriptor_suffix: Router
+                shipping:
+                  city: Bangalore
+                  country: IN
+                  line1: Juspay router
+                  line2: Koramangala
+                  line3: Stallion
+                  state: Karnataka
+                  zip: "560095"
+                  first_name: John
+                  last_name: Doe
+                billing:
+                  city: Bangalore
+                  country: IN
+                  line1: Juspay router
+                  line2: Koramangala
+                  line3: Stallion
+                  state: Karnataka
+                  zip: "560095"
+                  first_name: John
+                  last_name: Doe
+                metadata:
+                  udf1: value1
+                  new_customer: "true"
+                  login_date: 2019-09-10T10:11:12Z
+        "404":
+          description: Payment does not exist in records
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: object_not_found
+                  code: payment_not_found
+                  message: Payment does not exist in records
+        "400":
+          description: Invalid data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_data
+                  message: "cancellation_reason shall be passed as: <expected_data_type>"
+        "401":
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_api_authentication
+                  message: "Access forbidden, invalid api-key was used"
+  /payments/{id}/cancel:
+    post:
+      tags:
+      - Payments
+      summary: Payments - Cancel
+      description: "A Payment could can be cancelled when it is in one of these statuses:\
+        \ requires_payment_method, requires_capture, requires_confirmation, requires_customer_action"
+      operationId: cancelPayment
+      parameters:
+      - name: id
+        in: path
+        description: unique payment id
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentsCancelRequest'
+            example:
+              cancellation_reason: Payment attempt expired
+      responses:
+        "200":
+          description: Payment cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentsCreateResponse'
+              example:
+                payment_id: pay_mbabizu24mvu3mela5njyhpit4
+                amount: 6540
+                currency: USD
+                cancellation_reason: Payment attempt expired
+                status: cancelled
+                merchant_id: juspay_merchant
+                capture_method: automatic
+                capture_on: 2022-09-10T10:11:12Z
+                amount_to_capture: 6540
+                amount_capturable: 0
+                customer_id: cus_udst2tfldj6upmye2reztkmm4i
+                email: guest@example.com
+                name: John Doe
+                phone: "999999999"
+                phone_country_code: "+65"
+                description: Its my first payment request
+                return_url: http://example.com/payments
+                setup_future_usage: optional
+                authentication_type: no_three_ds
+                shipping:
+                  city: Bangalore
+                  country: IN
+                  line1: Juspay router
+                  line2: Koramangala
+                  line3: Stallion
+                  state: Karnataka
+                  zip: "560095"
+                  first_name: John
+                  last_name: Doe
+                billing:
+                  city: Bangalore
+                  country: IN
+                  line1: Juspay router
+                  line2: Koramangala
+                  line3: Stallion
+                  state: Karnataka
+                  zip: "560095"
+                  first_name: John
+                  last_name: Doe
+                next_action: null
+                metadata:
+                  udf1: value1
+                  new_customer: "true"
+                  login_date: 2019-09-10T10:11:12Z
+        "404":
+          description: Payment does not exist in records
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: object_not_found
+                  code: payment_not_found
+                  message: Payment does not exist in records
+        "400":
+          description: Invalid data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_data
+                  message: "cancellation_reason shall be passed as: <expected_data_type>"
+        "401":
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_api_authentication
+                  message: "Access forbidden, invalid api-key was used"
+  /refunds:
+    post:
+      tags:
+      - Refunds
+      - QuickStart
+      summary: Refunds - Create
+      description: To create a refund against an already processed payment
+      operationId: createRefunds
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefundsCreateRequest'
+            example:
+              payment_id: pay_mbabizu24mvu3mela5njyhpit4
+              refund_id: a8537066-2569-4ac4-a7d3-87453387b09b
+              amount: 100
+              currency: USD
+              reason: Customer returned product
+              metadata:
+                udf1: value1
+                new_customer: "true"
+                login_date: 2019-09-10T10:11:12Z
+      responses:
+        "200":
+          description: Refund created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefundsObject'
+              example:
+                payment_id: pay_mbabizu24mvu3mela5njyhpit4
+                refund_id: a8537066-2569-4ac4-a7d3-87453387b09b
+                amount: 100
+                status: pending
+                currency: USD
+                reason: Customer returned product
+                metadata:
+                  udf1: value1
+                  new_customer: "true"
+                  login_date: 2019-09-10T10:11:12Z
+                created_at: 2022-09-10T10:11:12Z
+        "400":
+          description: Missing Mandatory fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: parameter_missing
+                  message: "Missing required param: <parameter_name>"
+  /refunds/{id}:
+    get:
+      tags:
+      - Refunds
+      - QuickStart
+      summary: Refunds - Retrieve
+      description: To retrieve the properties of a Refund. This may be used to get
+        the status of a previously initiated payment or next action for an ongoing
+        payment
+      operationId: retrieveRefund
+      parameters:
+      - name: id
+        in: path
+        description: unique refund id
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Refund retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefundsObject'
+              example:
+                payment_id: pay_mbabizu24mvu3mela5njyhpit4
+                refund_id: a8537066-2569-4ac4-a7d3-87453387b09b
+                amount: 100
+                status: pending
+                currency: USD
+                reason: Customer returned product
+                metadata:
+                  udf1: value1
+                  new_customer: "true"
+                  login_date: 2019-09-10T10:11:12Z
+                created_at: 2022-09-10T10:11:12Z
+        "404":
+          description: Refund does not exist in records
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: object_not_found
+                  code: refund_not_found
+                  message: Refund does not exist in records
+        "401":
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_api_authentication
+                  message: "Access forbidden, invalid api-key was used"
+    post:
+      tags:
+      - Refunds
+      summary: Refunds - Update
+      description: To update the properties of a Refund object. This may include attaching
+        a reason for the refund or metadata fields
+      operationId: updateRefund
+      parameters:
+      - name: id
+        in: path
+        description: unique refund id
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefundsUpdateRequest'
+            example:
+              reason: Customer returned product
+              metadata:
+                udf1: value1
+                new_customer: "true"
+                login_date: 2019-09-10T10:11:12Z
+      responses:
+        "200":
+          description: Refund updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefundsObject'
+              example:
+                payment_id: pay_mbabizu24mvu3mela5njyhpit4
+                refund_id: a8537066-2569-4ac4-a7d3-87453387b09b
+                amount: 100
+                status: pending
+                currency: USD
+                reason: Customer returned product
+                metadata:
+                  udf1: value1
+                  new_customer: "true"
+                  login_date: 2019-09-10T10:11:12Z
+                created_at: 2022-09-10T10:11:12Z
+        "404":
+          description: Refund does not exist in records
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: object_not_found
+                  code: refund_not_found
+                  message: Refund does not exist in records
+        "400":
+          description: Invalid data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_data
+                  message: "Amount shall be passed as: <expected_data_type>"
+        "401":
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_api_authentication
+                  message: "Access forbidden, invalid api-key was used"
+  /payment_methods:
+    post:
+      tags:
+      - PaymentMethods
+      summary: PaymentMethods - Create
+      description: "To create a payment method against a customer object. In case\
+        \ of cards, this API could be used only by PCI compliant merchants"
+      operationId: createPaymentMethodForCustomer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentMethodsCreateRequest'
+      responses:
+        "200":
+          description: Payment Method Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentMethodsResponseObject'
+        "400":
+          description: Invalid data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_data
+                  message: "accepted_country shall be passed as: <expected_data_type>"
+        "401":
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_api_authentication
+                  message: "Access forbidden, invalid api-key was used"
+  /payment_methods/{id}:
+    post:
+      tags:
+      - PaymentMethods
+      summary: PaymentMethods - Update
+      description: "To update an existing a payment method attached to a customer\
+        \ object. This API is useful for use cases such as updating the card number\
+        \ for expired cards, to prevent discontinuity in recurring payments"
+      operationId: updatePaymentMethodForCustomer
+      parameters:
+      - name: id
+        in: path
+        description: The unique identifier for the payment method
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentMethodsUpdateRequest'
+      responses:
+        "200":
+          description: Payment Method Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentMethodsResponseObject'
+        "404":
+          description: Payment Method does not exist in records
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: object_not_found
+                  code: payment_method_not_found
+                  message: Payment Method does not exist in records
+        "400":
+          description: Invalid data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_data
+                  message: "accepted_country shall be passed as: <expected_data_type>"
+        "401":
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_api_authentication
+                  message: "Access forbidden, invalid api-key was used"
+  /payment_methods/{id}/detach:
+    post:
+      tags:
+      - PaymentMethods
+      summary: Delete PaymentMethods
+      description: Detaches a PaymentMethod object from a Customer.
+      operationId: deletePaymentMethods
+      parameters:
+      - name: id
+        in: path
+        description: The unique identifier for the payment method
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Payment Method detached successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentMethodDeleteResponse'
+        "404":
+          description: Payment Method does not exist in records
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: object_not_found
+                  code: payment_method_not_found
+                  message: Payment Method does not exist in records
+        "401":
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_api_authentication
+                  message: "Access forbidden, invalid api-key was used"
+  /payment_methods/{merchant_id}:
+    get:
+      tags:
+      - PaymentMethods
+      summary: List payment methods for a Merchant
+      description: To filter and list the applicable payment methods for a particular
+        merchant id.
+      operationId: listPaymentMethodsByMerchantId
+      parameters:
+      - name: accepted_country
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            maxLength: 2
+            minLength: 2
+            type: string
+            description: |
+              The two-letter ISO currency code
+            example: "[\"US\",\"UK\",\"IN\"]"
+      - name: accepted_currency
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
+            description: |
+              The three-letter ISO currency code
+            example: "[\"USD\",\"EUR\"]"
+      - name: minimum_amount
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          description: The minimum amount accepted for processing by the particular
+            payment method.
+          example: 100
+      - name: maximum_amount
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          description: The minimum amount accepted for processing by the particular
+            payment method.
+          example: 10000000
+      - name: recurring_payment_enabled
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
+          description: Indicates whether the payment method is eligible for recurring
+            payments
+          example: true
+      - name: installment_payment_enabled
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
+          description: Indicates whether the payment method is eligible for installment
+            payments
+          example: true
+      responses:
+        "200":
+          description: Payment Methods retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfMerchantPaymentMethods'
+        "404":
+          description: Payment Methods does not exist in records
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: object_not_found
+                  code: payment_method_not_found
+                  message: Payment Methods does not exist in records
+        "400":
+          description: Invalid data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_data
+                  message: "accepted_currency shall be passed as: <expected_data_type>"
+        "401":
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  type: invalid_request_error
+                  code: invalid_api_authentication
+                  message: "Access forbidden, invalid api-key was used"
+components:
+  schemas:
+    ArrayOfMerchantPaymentMethods:
+      type: array
+      items:
+        $ref: '#/components/schemas/ArrayOfMerchantPaymentMethods_inner'
+      x-schema-name: ArrayOfMerchantPaymentMethods
+    CustomerPaymentMethods:
+      type: object
+      properties:
+        enabled_payment_methods:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentMethodsEnabled'
+        customer_payment_methods:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentMethodsResponseObject'
+      example:
+        customer_payment_methods:
+        - payment_method_type: credit_card
+          payment_scheme:
+          - "[\"MASTER\",\"VISA\"]"
+          - "[\"MASTER\",\"VISA\"]"
+          accepted_currency:
+          - "[\"USD\",\"EUR\"]"
+          - "[\"USD\",\"EUR\"]"
+          payment_method_issuer_code: PM_APPLEPAY
+          maximum_amount: 10000000
+          minimum_amount: 100
+          recurring_payment_enabled: true
+          payment_method_issuer: Citibank
+          payment_method_id: pm_y3oqhf46pyzuxjbcn2giaqnb44
+          accepted_country:
+          - "[\"US\",\"UK\",\"IN\"]"
+          - "[\"US\",\"UK\",\"IN\"]"
+          installment_payment_enabled: true
+          payment_experience:
+          - "[\"redirect_to_url\",\"display_qr_code\"]"
+          - "[\"redirect_to_url\",\"display_qr_code\"]"
+          payment_method: card
+          card:
+            issuer_country: US
+            card_exp_year: "25"
+            card_fingerprint: fpt_78892490hfh3r834rd
+            last4_digits: xxxxxxxxxxxx4242
+            card_holder_name: John Doe
+            scheme: MASTER
+            card_token: tkn_78892490hfh3r834rd
+            card_exp_month: "10"
+        - payment_method_type: credit_card
+          payment_scheme:
+          - "[\"MASTER\",\"VISA\"]"
+          - "[\"MASTER\",\"VISA\"]"
+          accepted_currency:
+          - "[\"USD\",\"EUR\"]"
+          - "[\"USD\",\"EUR\"]"
+          payment_method_issuer_code: PM_APPLEPAY
+          maximum_amount: 10000000
+          minimum_amount: 100
+          recurring_payment_enabled: true
+          payment_method_issuer: Citibank
+          payment_method_id: pm_y3oqhf46pyzuxjbcn2giaqnb44
+          accepted_country:
+          - "[\"US\",\"UK\",\"IN\"]"
+          - "[\"US\",\"UK\",\"IN\"]"
+          installment_payment_enabled: true
+          payment_experience:
+          - "[\"redirect_to_url\",\"display_qr_code\"]"
+          - "[\"redirect_to_url\",\"display_qr_code\"]"
+          payment_method: card
+          card:
+            issuer_country: US
+            card_exp_year: "25"
+            card_fingerprint: fpt_78892490hfh3r834rd
+            last4_digits: xxxxxxxxxxxx4242
+            card_holder_name: John Doe
+            scheme: MASTER
+            card_token: tkn_78892490hfh3r834rd
+            card_exp_month: "10"
+        enabled_payment_methods:
+        - - payment_method_types:
+            - credit_card
+            - credit_card
+            payment_method_issuers:
+            - "[\"HDFC\"]"
+            - "[\"HDFC\"]"
+            installment_payment_enabled: true
+            accepted_countries:
+            - US
+            - US
+            maximum_amount: 0
+            payment_schemes:
+            - VISA
+            - VISA
+            minimum_amount: 1
+            payment_experience:
+            - redirect_to_url
+            payment_method: payment_method
+            accepted_currencies:
+            - USD
+            - USD
+            recurring_enabled: true
+          - payment_method_types:
+            - credit_card
+            - credit_card
+            payment_method_issuers:
+            - "[\"HDFC\"]"
+            - "[\"HDFC\"]"
+            installment_payment_enabled: true
+            accepted_countries:
+            - US
+            - US
+            maximum_amount: 0
+            payment_schemes:
+            - VISA
+            - VISA
+            minimum_amount: 1
+            payment_experience:
+            - redirect_to_url
+            payment_method: payment_method
+            accepted_currencies:
+            - USD
+            - USD
+            recurring_enabled: true
+        - - payment_method_types:
+            - credit_card
+            - credit_card
+            payment_method_issuers:
+            - "[\"HDFC\"]"
+            - "[\"HDFC\"]"
+            installment_payment_enabled: true
+            accepted_countries:
+            - US
+            - US
+            maximum_amount: 0
+            payment_schemes:
+            - VISA
+            - VISA
+            minimum_amount: 1
+            payment_experience:
+            - redirect_to_url
+            payment_method: payment_method
+            accepted_currencies:
+            - USD
+            - USD
+            recurring_enabled: true
+          - payment_method_types:
+            - credit_card
+            - credit_card
+            payment_method_issuers:
+            - "[\"HDFC\"]"
+            - "[\"HDFC\"]"
+            installment_payment_enabled: true
+            accepted_countries:
+            - US
+            - US
+            maximum_amount: 0
+            payment_schemes:
+            - VISA
+            - VISA
+            minimum_amount: 1
+            payment_experience:
+            - redirect_to_url
+            payment_method: payment_method
+            accepted_currencies:
+            - USD
+            - USD
+            recurring_enabled: true
+    Address:
+      type: object
+      properties:
+        line1:
+          maxLength: 200
+          type: string
+          description: The first line of the address
+          example: Juspay Router
+        line2:
+          maxLength: 200
+          type: string
+          description: The second line of the address
+          example: Koramangala
+        line3:
+          maxLength: 200
+          type: string
+          description: The second line of the address
+          example: Stallion
+        city:
+          maxLength: 50
+          type: string
+          description: The address city
+          example: Bangalore
+        state:
+          maxLength: 50
+          type: string
+          description: The address state
+          example: Karnataka
+        zip:
+          maxLength: 50
+          type: string
+          description: The address zip/postal code
+          example: "560095"
+        country:
+          maxLength: 2
+          minLength: 2
+          type: string
+          description: The two-letter ISO country code
+          example: IN
+      example:
+        zip: "560095"
+        country: IN
+        city: Bangalore
+        state: Karnataka
+        line3: Stallion
+        line2: Koramangala
+        line1: Juspay Router
+    CustomerCreateRequest:
+      type: object
+      properties:
+        customer_id:
+          maxLength: 255
+          type: string
+          description: The identifier for the customer object. If not provided the
+            customer ID will be autogenerated.
+          example: cus_y3oqhf46pyzuxjbcn2giaqnb44
+        email:
+          maxLength: 255
+          type: string
+          description: The customer's email address
+          format: email
+          example: JohnTest@test.com
+        name:
+          maxLength: 255
+          type: string
+          description: The customer's name
+          example: John Test
+        phone_country_code:
+          maxLength: 255
+          type: string
+          description: The country code for the customer phone number
+          example: "+65"
+        phone:
+          maxLength: 255
+          type: string
+          description: The customer's phone number
+          example: "9999999999"
+        description:
+          maxLength: 255
+          type: string
+          description: An arbitrary string that you can attach to a customer object.
+          example: First customer
+        address:
+          $ref: '#/components/schemas/Address'
+        metadata:
+          maxLength: 255
+          type: object
+          description: "You can specify up to 50 keys, with key names up to 40 characters\
+            \ long and values up to 500 characters long. Metadata is useful for storing\
+            \ additional, structured information on an object."
+          example:
+            city: NY
+            unit: "245"
+      description: The customer details
+    CustomerUpdateRequest:
+      type: object
+      properties:
+        email:
+          maxLength: 255
+          type: string
+          description: The customer's email address
+          format: email
+          example: JohnTest@test.com
+        name:
+          maxLength: 255
+          type: string
+          description: The customer's name
+          example: John Test
+        phone_country_code:
+          maxLength: 255
+          type: string
+          description: The country code for the customer phone number
+          example: "+65"
+        phone:
+          maxLength: 255
+          type: string
+          description: The customer's phone number
+          example: "9999999999"
+        address:
+          $ref: '#/components/schemas/Address'
+        description:
+          maxLength: 255
+          type: string
+          description: An arbitrary string that you can attach to a customer object.
+          example: First customer
+        metadata:
+          maxLength: 255
+          type: object
+          description: "You can specify up to 50 keys, with key names up to 40 characters\
+            \ long and values up to 500 characters long. Metadata is useful for storing\
+            \ additional, structured information on an object."
+          example:
+            city: NY
+            unit: "245"
+      description: The customer details to be updated
+    CustomerCreateResponse:
+      required:
+      - customer_id
+      type: object
+      properties:
+        customer_id:
+          maxLength: 255
+          type: string
+          description: The identifier for the customer object. If not provided the
+            customer ID will be autogenerated.
+          example: cus_y3oqhf46pyzuxjbcn2giaqnb44
+        email:
+          maxLength: 255
+          type: string
+          description: The customer's email address
+          format: email
+          example: JohnTest@test.com
+        name:
+          maxLength: 255
+          type: string
+          description: The customer's name
+          example: John Test
+        phone_country_code:
+          maxLength: 255
+          type: object
+          description: The country code for the customer phone number
+          example: 65
+        phone:
+          maxLength: 255
+          type: object
+          description: The customer's phone number
+          example: 9999999999
+        address:
+          $ref: '#/components/schemas/Address'
+        description:
+          maxLength: 255
+          type: object
+          description: An arbitrary string that you can attach to a customer object.
+          example: First customer
+        metadata:
+          maxLength: 255
+          type: object
+          description: "You can specify up to 50 keys, with key names up to 40 characters\
+            \ long and values up to 500 characters long. Metadata is useful for storing\
+            \ additional, structured information on an object."
+          example:
+            city: NY
+            unit: "245"
+      description: Customer
+      example:
+        metadata:
+          city: NY
+          unit: "245"
+        address:
+          zip: "560095"
+          country: IN
+          city: Bangalore
+          state: Karnataka
+          line3: Stallion
+          line2: Koramangala
+          line1: Juspay Router
+        phone_country_code: 65
+        phone: 9999999999
+        name: John Test
+        description: First customer
+        customer_id: cus_y3oqhf46pyzuxjbcn2giaqnb44
+        email: JohnTest@test.com
+    CustomerDeleteResponse:
+      required:
+      - customer_id
+      - deleted
+      type: object
+      properties:
+        customer_id:
+          maxLength: 255
+          type: string
+          description: The identifier for the customer object. If not provided the
+            customer ID will be autogenerated.
+          example: cus_y3oqhf46pyzuxjbcn2giaqnb44
+        deleted:
+          type: boolean
+          description: Indicates the deletion status of the customer object.
+          example: true
+      description: Customer
+      example:
+        deleted: true
+        customer_id: cus_y3oqhf46pyzuxjbcn2giaqnb44
+    UpdateCustomerRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          description: The email address of the customer
+          example: JohnTest@test.com
+        name:
+          type: string
+          description: The name of the customer
+          example: John Test
+        default:
+          type: string
+          description: The instrument ID for this customer’s default instrument
+          example: src_imu3wifxfvlebpqqq5usjrze6y
+        phone:
+          type: object
+          description: The customer's phone number
+          example: "9999999999"
+        address:
+          $ref: '#/components/schemas/Address'
+        metadata:
+          type: object
+          description: Allows you to store additional information about a customer.
+            You can include a maximum of 10 key-value pairs. Each key and value can
+            be up to 100 characters long.
+          example:
+            coupon_code: NY2018
+            partner_id: 123989
+      description: The customer attached to the instrument
+    PaymentsCreateRequest:
+      required:
+      - amount
+      - currency
+      type: object
+      properties:
+        amount:
+          minimum: 100
+          type: integer
+          description: |
+            The payment amount. Amount for the payment in lowest denomination of the currency. (i.e) in cents for USD denomination, in paisa for INR denomination etc.,
+          example: 6540
+        currency:
+          maxLength: 3
+          minLength: 3
+          type: string
+          description: |
+            The three-letter ISO currency code
+          example: USD
+        payment_id:
+          maxLength: 30
+          minLength: 30
+          type: string
+          description: |
+            Unique Identifier for the Payment. It is always recommended to provide this ID while creating a payment.
+            If the identifiers in not provided in the Payment Request, this filed shall be auto generated and provide in the API response. It is suggested to keep the payment_id length as a maximum of 30 alphanumeric characters irrespective of payment methods and gateways.
+            Sequential and only numeric characters are not recommended.
+          example: pay_mbabizu24mvu3mela5njyhpit4
+        confirm:
+          type: boolean
+          description: Whether to confirm the payment (if applicable)
+          example: true
+          default: false
+        capture_method:
+          type: string
+          description: "This is the instruction for capture/ debit the money from\
+            \ the users' card. On the other hand authorization refers to blocking\
+            \ the amount on the users' payment method. Capture request may happen\
+            \ in three types: (1) AUTOMATIC: Post the payment authorization, the capture\
+            \ will be executed on the full amount immediately, (2) MANUAL: The capture\
+            \ will happen only if the merchant triggers a Capture API request, (3)\
+            \ SCHEDULED: The capture can be scheduled to automatically get triggered\
+            \ at a specific date & time"
+          example: automatic
+          default: automatic
+          enum:
+          - automatic
+          - manual
+          - scheduled
+        capture_on:
+          description: |
+            A timestamp (ISO 8601 code) that determines when the payment should be captured.
+            Providing this field will automatically set `capture` to true
+          allOf:
+          - $ref: '#/components/schemas/Timestamp'
+        amount_to_capture:
+          minimum: 100
+          type: integer
+          description: |
+            The Amount to be captured/ debited from the users payment method. It shall be in lowest denomination of the currency. (i.e) in cents for USD denomination, in paisa for INR denomination etc.,
+            If not provided, the default amount_to_capture will be the payment amount.
+          example: 6540
+        customer_id:
+          maxLength: 255
+          type: string
+          description: The identifier for the customer object. If not provided the
+            customer ID will be autogenerated.
+          example: cus_y3oqhf46pyzuxjbcn2giaqnb44
+        description:
+          maxLength: 255
+          type: string
+          description: A description of the payment
+          example: Its my first payment request
+        email:
+          maxLength: 255
+          type: string
+          description: The customer's email address
+          format: email
+          example: JohnTest@test.com
+        name:
+          maxLength: 255
+          type: string
+          description: The customer's name
+          example: John Test
+        phone:
+          maxLength: 255
+          type: string
+          description: The customer's phone number
+          example: "9999999999"
+        phone_country_code:
+          maxLength: 255
+          type: string
+          description: The country code for the customer phone number
+          example: "+65"
+        return_url:
+          maxLength: 255
+          type: string
+          description: The URL to redirect after the completion of the operation
+          example: https://juspay.io/
+        setup_future_usage:
+          type: string
+          description: "Indicates that you intend to make future payments with this\
+            \ Payment’s payment method. Providing this parameter will attach the payment\
+            \ method to the Customer, if present, after the Payment is confirmed and\
+            \ any required actions from the user are complete."
+          example: off_session
+          enum:
+          - on_session
+          - off_session
+        off_session:
+          type: boolean
+          description: "Set to true to indicate that the customer is not in your checkout\
+            \ flow during this payment, and therefore is unable to authenticate. This\
+            \ parameter is intended for scenarios where you collect card details and\
+            \ charge them later. This parameter can only be used with confirm=true."
+          example: true
+        mandate_data:
+          $ref: '#/components/schemas/PaymentsCreateRequest_mandate_data'
+        mandate_id:
+          type: string
+          description: ID of the mandate to be used for this payment. This parameter
+            can only be used with confirm = true. This parameter should be passed
+            for Merchant Initiated Transaction scenarios where the user has already
+            registered for a mandate and raw payment method details are not available.
+          example: mandate_iwer89rnjef349dni3
+        authentication_type:
+          type: string
+          description: "The transaction authentication can be set to undergo payer\
+            \ authentication. Possible values are: (i) THREE_DS: If the card is enrolled\
+            \ for 3DS authentication, the 3DS based authentication will be activated.\
+            \ The liability of chargeback shift to the issuer, (ii) NO_THREE_DS: 3DS\
+            \ based authentication will not be activated. The liability of chargeback\
+            \ stays with the merchant. By default, the authentication will be marked\
+            \ as NO_THREE_DS"
+          example: no_three_ds
+          default: no_three_ds
+          enum:
+          - three_ds
+          - three_ds_2
+          - no_three_ds
+        payment_method:
+          type: string
+          description: The payment method
+          example: card
+          enum:
+          - card
+          - bank_transfer
+          - netbanking
+          - upi
+          - open_banking
+          - consumer_finance
+          - wallet
+        payment_method_data:
+          $ref: '#/components/schemas/PaymentsCreateRequest_payment_method_data'
+        billing:
+          $ref: '#/components/schemas/Address'
+        shipping:
+          $ref: '#/components/schemas/Address'
+        statement_descriptor_name:
+          maxLength: 255
+          type: string
+          description: "For non-card charges, you can use this value as the complete\
+            \ description that appears on your customers’ statements. Must contain\
+            \ at least one letter, maximum 22 characters."
+          example: Juspay Router
+        statement_descriptor_suffix:
+          maxLength: 255
+          type: string
+          description: Provides information about a card payment that customers see
+            on their statements. Concatenated with the prefix (shortened descriptor)
+            or statement descriptor that’s set on the account to form the complete
+            statement descriptor. Maximum 22 characters for the concatenated descriptor.
+          example: Payment for shoes purchase
+        metadata:
+          maxLength: 255
+          type: object
+          description: "You can specify up to 50 keys, with key names up to 40 characters\
+            \ long and values up to 500 characters long. Metadata is useful for storing\
+            \ additional, structured information on an object."
+          example:
+            city: NY
+            unit: "245"
+    PaymentsConfirmRequest:
+      type: object
+      properties:
+        return_url:
+          maxLength: 255
+          type: string
+          description: The URL to redirect after the completion of the operation
+          example: www.example.com/success
+        setup_future_usage:
+          type: string
+          description: "Indicates that you intend to make future payments with this\
+            \ Payment’s payment method. Possible values are: (i) REQUIRED: The payment\
+            \ will be processed only with payment methods eligible for recurring payments\
+            \ (ii) OPTIONAL: The payment may/ may not be processed with payment methods\
+            \ eligible for recurring payments"
+          example: required
+          enum:
+          - required
+          - optional
+        authentication_type:
+          type: string
+          description: "The transaction authentication can be set to undergo payer\
+            \ authentication. Possible values are: (i) THREE_DS: If the card is enrolled\
+            \ for 3DS authentication, the 3DS based authentication will be activated.\
+            \ The liability of chargeback shift to the issuer, (ii) NO_THREE_DS: 3DS\
+            \ based authentication will not be activated. The liability of chargeback\
+            \ stays with the merchant. By default, the authentication will be marked\
+            \ as NO_THREE_DS"
+          default: no_three_ds
+          enum:
+          - three_ds
+          - no_three_ds
+        payment_method:
+          type: string
+          description: The payment method
+          example: automatic
+          default: three_ds
+          enum:
+          - card
+          - bank_transfer
+          - netbanking
+          - upi
+          - open_banking
+          - consumer_finance
+          - wallet
+        payment_method_data:
+          type: object
+          description: The payment method information
+          oneOf:
+          - $ref: '#/components/schemas/CardData'
+        save_payment_method:
+          type: boolean
+          description: "Enable this flag as true, if the user has consented for saving\
+            \ the payment method information"
+          example: true
+          default: false
+        billing:
+          $ref: '#/components/schemas/Address'
+        shipping:
+          $ref: '#/components/schemas/Address'
+    PaymentsUpdateRequest:
+      type: object
+      properties:
+        amount:
+          minimum: 100
+          type: integer
+          description: |
+            The payment amount. Amount for the payment in lowest denomination of the currency. (i.e) in cents for USD denomination, in paisa for INR denomination etc.,
+          example: 6540
+        currency:
+          maxLength: 3
+          minLength: 3
+          type: string
+          description: |
+            The three-letter ISO currency code
+          example: USD
+        capture_method:
+          type: string
+          description: "This is the instruction for capture/ debit the money from\
+            \ the users' card. On the other hand authorization refers to blocking\
+            \ the amount on the users' payment method. Capture request may happen\
+            \ in three types: (1) AUTOMATIC: Post the payment authorization, the capture\
+            \ will be executed on the full amount immediately, (2) MANUAL: The capture\
+            \ will happen only if the merchant triggers a Capture API request, (3)\
+            \ SCHEDULED: The capture can be scheduled to automatically get triggered\
+            \ at a specific date & time"
+          example: automatic
+          default: automatic
+          enum:
+          - automatic
+          - manual
+          - scheduled
+        capture_on:
+          description: |
+            A timestamp (ISO 8601 code) that determines when the payment should be captured.
+            Providing this field will automatically set `capture` to true
+          allOf:
+          - $ref: '#/components/schemas/Timestamp'
+        amount_to_capture:
+          minimum: 100
+          type: integer
+          description: |
+            The Amount to be captured/ debited from the users payment method. It shall be in lowest denomination of the currency. (i.e) in cents for USD denomination, in paisa for INR denomination etc.,
+            If not provided, the default amount_to_capture will be the payment amount.
+          example: 6540
+        customer_id:
+          maxLength: 255
+          type: string
+          description: The identifier for the customer object. If not provided the
+            customer ID will be autogenerated.
+          example: cus_y3oqhf46pyzuxjbcn2giaqnb44
+        description:
+          maxLength: 255
+          type: string
+          description: A description of the payment
+          example: Its my first payment request
+        email:
+          maxLength: 255
+          type: string
+          description: The customer's email address
+          format: email
+          example: JohnTest@test.com
+        name:
+          maxLength: 255
+          type: string
+          description: The customer's name
+          example: John Test
+        phone:
+          maxLength: 255
+          type: string
+          description: The customer's phone number
+          example: "9999999999"
+        phone_country_code:
+          maxLength: 255
+          type: string
+          description: The country code for the customer phone number
+          example: "+65"
+        setup_future_usage:
+          type: string
+          description: "Indicates that you intend to make future payments with this\
+            \ Payment’s payment method. Possible values are: (i) REQUIRED: The payment\
+            \ will be processed only with payment methods eligible for recurring payments\
+            \ (ii) OPTIONAL: The payment may/ may not be processed with payment methods\
+            \ eligible for recurring payments"
+          example: required
+          enum:
+          - required
+          - optional
+        authentication_type:
+          type: string
+          description: "The transaction authentication can be set to undergo payer\
+            \ authentication. Possible values are: (i) THREE_DS: If the card is enrolled\
+            \ for 3DS authentication, the 3DS based authentication will be activated.\
+            \ The liability of chargeback shift to the issuer, (ii) NO_THREE_DS: 3DS\
+            \ based authentication will not be activated. The liability of chargeback\
+            \ stays with the merchant. By default, the authentication will be marked\
+            \ as NO_THREE_DS"
+          default: no_three_ds
+          enum:
+          - three_ds
+          - no_three_ds
+        payment_method:
+          type: string
+          description: The payment method
+          example: automatic
+          default: three_ds
+          enum:
+          - card
+          - bank_transfer
+          - netbanking
+          - upi
+          - open_banking
+          - consumer_finance
+          - wallet
+        payment_method_data:
+          type: object
+          description: The payment method information
+          oneOf:
+          - $ref: '#/components/schemas/CardData'
+        save_payment_method:
+          type: boolean
+          description: "Enable this flag as true, if the user has consented for saving\
+            \ the payment method information"
+          example: true
+          default: false
+        billing:
+          $ref: '#/components/schemas/Address'
+        shipping:
+          $ref: '#/components/schemas/Address'
+        statement_descriptor_name:
+          maxLength: 255
+          type: string
+          description: "For non-card charges, you can use this value as the complete\
+            \ description that appears on your customers’ statements. Must contain\
+            \ at least one letter, maximum 22 characters."
+          example: Juspay Router
+        statement_descriptor_suffix:
+          maxLength: 255
+          type: string
+          description: Provides information about a card payment that customers see
+            on their statements. Concatenated with the prefix (shortened descriptor)
+            or statement descriptor that’s set on the account to form the complete
+            statement descriptor. Maximum 22 characters for the concatenated descriptor.
+          example: Payment for shoes purchase
+        metadata:
+          maxLength: 255
+          type: object
+          description: "You can specify up to 50 keys, with key names up to 40 characters\
+            \ long and values up to 500 characters long. Metadata is useful for storing\
+            \ additional, structured information on an object."
+          example:
+            city: NY
+            unit: "245"
+    PaymentsCaptureRequest:
+      type: object
+      properties:
+        amount_to_capture:
+          minimum: 100
+          type: integer
+          description: |
+            The Amount to be captured/ debited from the users payment method. It shall be in lowest denomination of the currency. (i.e) in cents for USD denomination, in paisa for INR denomination etc.,
+            If not provided, the default amount_to_capture will be the payment amount.
+          example: 6540
+        statement_descriptor_name:
+          maxLength: 255
+          type: string
+          description: "For non-card charges, you can use this value as the complete\
+            \ description that appears on your customers’ statements. Must contain\
+            \ at least one letter, maximum 22 characters."
+          example: Juspay Router
+        statement_descriptor_suffix:
+          maxLength: 255
+          type: string
+          description: Provides information about a card payment that customers see
+            on their statements. Concatenated with the prefix (shortened descriptor)
+            or statement descriptor that’s set on the account to form the complete
+            statement descriptor. Maximum 22 characters for the concatenated descriptor.
+          example: Payment for shoes purchase
+    PaymentsCancelRequest:
+      type: object
+      properties:
+        cancellation_reason:
+          maxLength: 255
+          type: string
+          description: Provides information on the reason for cancellation
+          example: Timeout for payment completion
+    PaymentsCreateResponse:
+      required:
+      - amount
+      - currency
+      - mandate_id
+      - payment_id
+      - status
+      type: object
+      properties:
+        payment_id:
+          maxLength: 30
+          type: string
+          description: |
+            Unique Identifier for the Payment. It is always recommended to provide this ID while creating a payment.
+            If the identifiers in not provided in the Payment Request, this filed shall be auto generated and provide in the API response. It is suggested to keep the payment_id length as a maximum of 30 alphanumeric characters irrespective of payment methods and gateways.
+            Sequential and only numeric characters are not recommended.
+          example: pay_mbabizu24mvu3mela5njyhpit4
+        status:
+          type: string
+          description: The status of the payment
+          example: succeeded
+          enum:
+          - succeeded
+          - failed
+          - processing
+          - requires_customer_action
+          - requires_payment_method
+          - requires_confirmation
+          - required_capture
+        amount:
+          minimum: 100
+          type: integer
+          description: |
+            The payment amount. Amount for the payment in lowest denomination of the currency. (i.e) in cents for USD denomination, in paisa for INR denomination etc.,
+          example: 6540
+        currency:
+          maxLength: 3
+          minLength: 3
+          type: string
+          description: |
+            The three-letter ISO currency code
+          example: USD
+        cancellation_reason:
+          maxLength: 255
+          type: string
+          description: The reason for cancelling the payment
+          nullable: true
+          example: Payment attempt expired
+        capture_method:
+          type: string
+          description: "This is the instruction for capture/ debit the money from\
+            \ the users' card. On the other hand authorization refers to blocking\
+            \ the amount on the users' payment method. Capture request may happen\
+            \ in three types: (1) AUTOMATIC: Post the payment authorization, the capture\
+            \ will be executed on the full amount immediately, (2) MANUAL: The capture\
+            \ will happen only if the merchant triggers a Capture API request, (3)\
+            \ SCHEDULED: The capture can be scheduled to automatically get triggered\
+            \ at a specific date & time"
+          example: automatic
+          default: automatic
+          enum:
+          - automatic
+          - manual
+          - scheduled
+        capture_on:
+          description: |
+            A timestamp (ISO 8601 code) that determines when the payment should be captured.
+            Providing this field will automatically set `capture` to true
+          allOf:
+          - $ref: '#/components/schemas/Timestamp'
+        amount_to_capture:
+          minimum: 100
+          type: integer
+          description: |
+            The Amount to be captured/ debited from the users payment method. It shall be in lowest denomination of the currency. (i.e) in cents for USD denomination, in paisa for INR denomination etc.,
+            If not provided, the default amount_to_capture will be the payment amount.
+          nullable: true
+          example: 6540
+        amount_capturable:
+          minimum: 100
+          type: integer
+          description: The maximum amount that could be captured from the payment
+          nullable: true
+          example: 6540
+        amount_received:
+          minimum: 100
+          type: integer
+          description: The amount which is already captured from the payment
+          nullable: true
+          example: 6540
+        customer_id:
+          maxLength: 255
+          type: string
+          description: The identifier for the customer object. If not provided the
+            customer ID will be autogenerated.
+          nullable: true
+          example: cus_y3oqhf46pyzuxjbcn2giaqnb44
+        email:
+          maxLength: 255
+          type: string
+          description: The customer's email address
+          format: email
+          nullable: true
+          example: JohnTest@test.com
+        name:
+          maxLength: 255
+          type: string
+          description: The customer's name
+          nullable: true
+          example: John Test
+        phone:
+          maxLength: 255
+          type: string
+          description: The customer's phone number
+          nullable: true
+          example: "9999999999"
+        phone_country_code:
+          maxLength: 255
+          type: string
+          description: The country code for the customer phone number
+          nullable: true
+          example: "+65"
+        client_secret:
+          maxLength: 30
+          minLength: 30
+          type: string
+          description: This is a 15 minute expiry token which shall be used from the
+            client to authenticate and perform sessions from the SDK
+          nullable: true
+          example: secret_k2uj3he2893ein2d
+        description:
+          maxLength: 255
+          type: string
+          description: A description of the payment
+          nullable: true
+          example: Its my first payment request
+        setup_future_usage:
+          type: string
+          description: "Indicates that you intend to make future payments with this\
+            \ Payment’s payment method. Providing this parameter will attach the payment\
+            \ method to the Customer, if present, after the Payment is confirmed and\
+            \ any required actions from the user are complete."
+          example: off_session
+          enum:
+          - on_session
+          - off_session
+        off_session:
+          type: boolean
+          description: "Set to true to indicate that the customer is not in your checkout\
+            \ flow during this payment, and therefore is unable to authenticate. This\
+            \ parameter is intended for scenarios where you collect card details and\
+            \ charge them later. This parameter can only be used with confirm=true."
+          example: true
+        mandate_id:
+          type: string
+          description: ID of the mandate used for this payment. This parameter can
+            only be used with confirm = true. This parameter should be passed for
+            Merchant Initiated Transaction scenarios where the user has already registered
+            for a mandate and raw payment method details are not passed
+          example: mandate_iwer89rnjef349dni3
+        mandate_data:
+          $ref: '#/components/schemas/PaymentsCreateRequest_mandate_data'
+        authentication_type:
+          type: string
+          description: "The transaction authentication can be set to undergo payer\
+            \ authentication. Possible values are: (i) THREE_DS: If the card is enrolled\
+            \ for 3DS authentication, the 3DS based authentication will be activated.\
+            \ The liability of chargeback shift to the issuer, (ii) NO_THREE_DS: 3DS\
+            \ based authentication will not be activated. The liability of chargeback\
+            \ stays with the merchant. By default, the authentication will be marked\
+            \ as NO_THREE_DS"
+          example: no_three_ds
+          default: no_three_ds
+          enum:
+          - three_ds
+          - no_three_ds
+        billing:
+          $ref: '#/components/schemas/Address'
+        shipping:
+          $ref: '#/components/schemas/Address'
+        statement_descriptor_name:
+          maxLength: 255
+          type: string
+          description: "For non-card charges, you can use this value as the complete\
+            \ description that appears on your customers’ statements. Must contain\
+            \ at least one letter, maximum 22 characters."
+          nullable: true
+          example: Juspay Router
+        statement_descriptor_suffix:
+          maxLength: 255
+          type: string
+          description: Provides information about a card payment that customers see
+            on their statements. Concatenated with the prefix (shortened descriptor)
+            or statement descriptor that’s set on the account to form the complete
+            statement descriptor. Maximum 22 characters for the concatenated descriptor.
+          nullable: true
+          example: Payment for shoes purchase
+        next_action:
+          $ref: '#/components/schemas/NextAction'
+        metadata:
+          maxLength: 255
+          type: object
+          description: "You can specify up to 50 keys, with key names up to 40 characters\
+            \ long and values up to 500 characters long. Metadata is useful for storing\
+            \ additional, structured information on an object."
+          nullable: true
+          example:
+            city: NY
+            unit: "245"
+      description: Payment Response
+      example:
+        metadata:
+          city: NY
+          unit: "245"
+        statement_descriptor_name: Juspay Router
+        amount_capturable: 6540
+        description: Its my first payment request
+        mandate_id: mandate_iwer89rnjef349dni3
+        authentication_type: no_three_ds
+        billing:
+          zip: "560095"
+          country: IN
+          city: Bangalore
+          state: Karnataka
+          line3: Stallion
+          line2: Koramangala
+          line1: Juspay Router
+        shipping: null
+        payment_id: pay_mbabizu24mvu3mela5njyhpit4
+        off_session: true
+        currency: USD
+        client_secret: secret_k2uj3he2893ein2d
+        amount_to_capture: 6540
+        email: JohnTest@test.com
+        capture_method: automatic
+        amount: 6540
+        phone_country_code: "+65"
+        amount_received: 6540
+        setup_future_usage: off_session
+        cancellation_reason: Payment attempt expired
+        capture_on: ""
+        phone: "9999999999"
+        name: John Test
+        next_action:
+          redirect_to_url: https://pg-redirect-page.com
+          display_qr_code: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADUAAAA1AQAAAADJnZ7dAAABs0lEQVR4nAGoAVf+AgFqqzCrHAACfO2eCXLx8ALIuWcFE2AgAgDMJY+7KAACAMP1N48IAAI4wJ9v8kDgAoT27OLpdxAC/g8wHJSz+ALG5FSP+HnIAt7Si9v6m+AC+hZxUPoJWAKN7C4q3rTAAi/TeN30+6ACMYHnWkM8uALzviwJR9UIAs36kzcuuqACxsgBlqjsSAJrqdLoS4QAAimoq+YS7zgCM3EsnwNXeALqzAWMrDxgAnp3ZKuU/qACbmkC+I8riALKwNCjMUMoAs3w0GTalKgCdysPb"
+          invoke_payment_app:
+            intent_uri: upi://pay?pa=hhferf@abc&pn=merchant%20com&mc=5815&tid=pnf20200807108614390166&tr=20200807108614390166&tn=Transaction_Note&am=1&cu=INR
+          trigger_api:
+            api_name: submit_otp
+            doc: https://router.juspay.io/api-reference/submit_otp
+          invoke_sdk_client:
+            sdk_name: gpay
+            sdk_params:
+              param1: value
+              param2: value
+            intent_uri: upi://pay?pa=hhferf@abc&pn=merchant%20com&mc=5815&tid=pnf20200807108614390166&tr=20200807108614390166&tn=Transaction_Note&am=1&cu=INR
+        statement_descriptor_suffix: Payment for shoes purchase
+        customer_id: cus_y3oqhf46pyzuxjbcn2giaqnb44
+        mandate_data:
+          customer_acceptance:
+            acceptance_type: online
+            online:
+              ip_address: 127.0.0.1
+              user_agent: device
+            accepted_at: 2000-01-23T04:56:07.000+00:00
+        status: succeeded
+    MandateListResponse:
+      required:
+      - mandate_id
+      - payment_method_id
+      - status
+      type: object
+      properties:
+        mandate_id:
+          type: string
+          description: |
+            The unique id corresponding to the mandate.
+          example: mandate_end38934n12s923d0
+        status:
+          type: string
+          description: "The status of the mandate, which indicates whether it can\
+            \ be used to initiate a payment."
+          example: active
+          enum:
+          - active
+          - inactive
+          - pending
+          - revoked
+        type:
+          type: string
+          description: The type of the mandate. (i) single_use refers to one-time
+            mandates and (ii) multi-user refers to multiple payments.
+          example: multi_use
+          default: multi_use
+          enum:
+          - multi_use
+          - single_use
+        payment_method_id:
+          type: string
+          description: The id corresponding to the payment method.
+          example: pm_end38934n12s923d0
+        payment_method:
+          type: string
+          description: |
+            The type of payment method use for the payment.
+          example: card
+          enum:
+          - card
+          - payment_container
+          - bank_transfer
+          - bank_debit
+          - pay_later
+          - upi
+          - netbanking
+        card:
+          $ref: '#/components/schemas/CardPaymentMethodResponse'
+        customer_acceptance:
+          $ref: '#/components/schemas/CustomerAcceptance'
+      description: Mandate Payment Create Response
+      example:
+        customer_acceptance:
+          acceptance_type: online
+          online:
+            ip_address: 127.0.0.1
+            user_agent: device
+          accepted_at: 2000-01-23T04:56:07.000+00:00
+        payment_method_id: pm_end38934n12s923d0
+        mandate_id: mandate_end38934n12s923d0
+        type: multi_use
+        payment_method: card
+        card:
+          issuer_country: US
+          card_exp_year: "25"
+          card_fingerprint: fpt_78892490hfh3r834rd
+          last4_digits: xxxxxxxxxxxx4242
+          card_holder_name: John Doe
+          scheme: MASTER
+          card_token: tkn_78892490hfh3r834rd
+          card_exp_month: "10"
+        status: active
+    CustomerAcceptance:
+      type: object
+      properties:
+        accepted_at:
+          $ref: '#/components/schemas/Timestamp'
+        online:
+          $ref: '#/components/schemas/CustomerAcceptanceOnline'
+        acceptance_type:
+          type: string
+          description: The type of customer acceptance information included with the
+            Mandate. One of online or offline.
+          example: online
+          enum:
+          - online
+          - offline
+      description: Details about the customer’s acceptance of the mandate.
+      example:
+        acceptance_type: online
+        online:
+          ip_address: 127.0.0.1
+          user_agent: device
+        accepted_at: 2000-01-23T04:56:07.000+00:00
+    CustomerAcceptanceOnline:
+      type: object
+      properties:
+        ip_address:
+          type: string
+          description: The IP address from which the Mandate was accepted by the customer.
+          example: 127.0.0.1
+        user_agent:
+          type: string
+          description: The user agent of the browser from which the Mandate was accepted
+            by the customer.
+          example: device
+      description: "If this is a Mandate accepted online, this hash contains details\
+        \ about the online acceptance."
+      example:
+        ip_address: 127.0.0.1
+        user_agent: device
+    PaymentMethodsCreateRequest:
+      required:
+      - payment_method
+      type: object
+      properties:
+        payment_method:
+          type: string
+          description: |
+            The type of payment method use for the payment.
+          example: card
+          enum:
+          - card
+          - payment_container
+          - bank_transfer
+          - bank_debit
+          - pay_later
+          - upi
+          - netbanking
+        payment_method_type:
+          type: string
+          description: |
+            This is a sub-category of payment method.
+          example: credit_card
+          enum:
+          - credit_card
+          - debit_card
+          - upi_intent
+          - upi_collect
+          - credit_card_installments
+          - pay_later_installments
+        payment_method_issuer:
+          type: string
+          description: |
+            The name of the bank/ provider issuing the payment method to the end user
+          example: Citibank
+        payment_method_issuer_code:
+          type: string
+          description: |
+            A standard code representing the issuer of payment method
+          example: JP_APPLEPAY
+        card:
+          $ref: '#/components/schemas/CardPaymentMethodRequest'
+        customer_id:
+          type: string
+          description: |
+            The unique identifier of the Customer.
+          example: cus_mnewerunwiuwiwqw
+        metadata:
+          type: object
+          description: "You can specify up to 50 keys, with key names up to 40 characters\
+            \ long and values up to 500 characters long. Metadata is useful for storing\
+            \ additional, structured information on an object."
+          example:
+            city: NY
+            unit: "245"
+    PaymentMethodsUpdateRequest:
+      type: object
+      properties:
+        card:
+          $ref: '#/components/schemas/CardPaymentMethodRequest'
+        billing:
+          $ref: '#/components/schemas/Address'
+        metadata:
+          type: object
+          description: "You can specify up to 50 keys, with key names up to 40 characters\
+            \ long and values up to 500 characters long. Metadata is useful for storing\
+            \ additional, structured information on an object."
+          example:
+            city: NY
+            unit: "245"
+    PaymentMethodsResponseObject:
+      required:
+      - installment_enabled
+      - payment_experience
+      - payment_method
+      - payment_method_id
+      - recurring_enabled
+      type: object
+      properties:
+        payment_method_id:
+          maxLength: 30
+          type: string
+          description: The identifier for the payment method object.
+          example: pm_y3oqhf46pyzuxjbcn2giaqnb44
+        payment_method:
+          type: string
+          description: |
+            The type of payment method use for the payment.
+          example: card
+          enum:
+          - card
+          - payment_container
+          - bank_transfer
+          - bank_debit
+          - pay_later
+          - upi
+          - netbanking
+        payment_method_type:
+          type: string
+          description: |
+            This is a sub-category of payment method.
+          example: credit_card
+          enum:
+          - credit_card
+          - debit_card
+          - upi_intent
+          - upi_collect
+          - credit_card_installments
+          - pay_later_installments
+        payment_method_issuer:
+          type: string
+          description: |
+            The name of the bank/ provider issuing the payment method to the end user
+          example: Citibank
+        payment_method_issuer_code:
+          type: string
+          description: |
+            A standard code representing the issuer of payment method
+          example: PM_APPLEPAY
+        card:
+          $ref: '#/components/schemas/CardPaymentMethodResponse'
+        payment_scheme:
+          type: array
+          items:
+            type: string
+            description: |
+              The network scheme to which the payment method belongs
+            example: "[\"MASTER\",\"VISA\"]"
+        accepted_country:
+          type: array
+          items:
+            maxLength: 2
+            minLength: 2
+            type: string
+            description: |
+              The two-letter ISO currency code
+            example: "[\"US\",\"UK\",\"IN\"]"
+        accepted_currency:
+          type: array
+          items:
+            type: string
+            description: |
+              The three-letter ISO currency code
+            example: "[\"USD\",\"EUR\"]"
+        minimum_amount:
+          type: integer
+          description: |
+            The minimum amount accepted for processing by the particular payment method.
+          example: 100
+        maximum_amount:
+          type: integer
+          description: |
+            The minimum amount accepted for processing by the particular payment method.
+          example: 10000000
+        recurring_payment_enabled:
+          type: boolean
+          description: Indicates whether the payment method is eligible for recurring
+            payments
+          example: true
+        installment_payment_enabled:
+          type: boolean
+          description: Indicates whether the payment method is eligible for installment
+            payments
+          example: true
+        payment_experience:
+          type: array
+          items:
+            type: string
+            description: "This indicates type of action that is required in order\
+              \ to complete the payment with inputs from the user. This may involve\
+              \ actions such as redirecting the user to a URL, displaying a QR code,\
+              \ invoking the SDK client"
+            example: "[\"redirect_to_url\",\"display_qr_code\"]"
+            enum:
+            - redirect_to_url
+            - display_qr_code
+            - invoke_sdk_client
+      example:
+        payment_method_type: credit_card
+        payment_scheme:
+        - "[\"MASTER\",\"VISA\"]"
+        - "[\"MASTER\",\"VISA\"]"
+        accepted_currency:
+        - "[\"USD\",\"EUR\"]"
+        - "[\"USD\",\"EUR\"]"
+        payment_method_issuer_code: PM_APPLEPAY
+        maximum_amount: 10000000
+        minimum_amount: 100
+        recurring_payment_enabled: true
+        payment_method_issuer: Citibank
+        payment_method_id: pm_y3oqhf46pyzuxjbcn2giaqnb44
+        accepted_country:
+        - "[\"US\",\"UK\",\"IN\"]"
+        - "[\"US\",\"UK\",\"IN\"]"
+        installment_payment_enabled: true
+        payment_experience:
+        - "[\"redirect_to_url\",\"display_qr_code\"]"
+        - "[\"redirect_to_url\",\"display_qr_code\"]"
+        payment_method: card
+        card:
+          issuer_country: US
+          card_exp_year: "25"
+          card_fingerprint: fpt_78892490hfh3r834rd
+          last4_digits: xxxxxxxxxxxx4242
+          card_holder_name: John Doe
+          scheme: MASTER
+          card_token: tkn_78892490hfh3r834rd
+          card_exp_month: "10"
+    PaymentMethodDeleteResponse:
+      required:
+      - deleted
+      - payment_method_id
+      type: object
+      properties:
+        payment_method_id:
+          maxLength: 30
+          type: string
+          description: The identifier for the payment method object.
+          example: pm_y3oqhf46pyzuxjbcn2giaqnb44
+        deleted:
+          type: boolean
+          description: Indicates the deletion status of the payment method object.
+          example: true
+      description: Payment Method deletion confirmation
+      example:
+        payment_method_id: pm_y3oqhf46pyzuxjbcn2giaqnb44
+        deleted: true
+    RefundsCreateRequest:
+      required:
+      - payment_id
+      type: object
+      properties:
+        amount:
+          minimum: 100
+          type: integer
+          description: |
+            Total amount for which the refund is to be initiated. Amount for the payment in lowest denomination of the currency. (i.e) in cents for USD denomination, in paisa for INR denomination etc.,
+            If not provided, this will default to the full payment amount
+          example: 6540
+        refund_id:
+          maxLength: 30
+          minLength: 30
+          type: string
+          description: |
+            Unique Identifier for the Refund. This is to ensure idempotency for multiple partial refund initiated against the same payment.
+            If the identifiers is not defined by the merchant, this filed shall be auto generated and provide in the API response.
+            It is recommended to generate uuid(v4) as the refund_id.
+          example: ref_mbabizu24mvu3mela5njyhpit4
+        payment_id:
+          maxLength: 30
+          minLength: 30
+          type: string
+          description: |
+            Unique Identifier for the Payment. It is always recommended to provide this ID while creating a payment.
+            If the identifiers in not provided in the Payment Request, this filed shall be auto generated and provide in the API response. It is suggested to keep the payment_id length as a maximum of 30 alphanumeric characters irrespective of payment methods and gateways.
+            Sequential and only numeric characters are not recommended.
+          example: pay_mbabizu24mvu3mela5njyhpit4
+        currency:
+          maxLength: 3
+          minLength: 3
+          type: string
+          description: |
+            The three-letter ISO currency code
+          example: USD
+        reason:
+          maxLength: 255
+          type: string
+          description: An arbitrary string attached to the object. Often useful for
+            displaying to users and your customer support executive
+          example: Customer returned the product
+        created_at:
+          description: |
+            A timestamp (ISO 8601 code) that determines when the refund was created.
+          allOf:
+          - $ref: '#/components/schemas/Timestamp'
+        metadata:
+          maxLength: 255
+          type: object
+          description: "You can specify up to 50 keys, with key names up to 40 characters\
+            \ long and values up to 500 characters long. Metadata is useful for storing\
+            \ additional, structured information on an object."
+          example:
+            city: NY
+            unit: "245"
+    RefundsUpdateRequest:
+      required:
+      - metadata
+      type: object
+      properties:
+        reason:
+          maxLength: 255
+          type: string
+          description: An arbitrary string attached to the object. Often useful for
+            displaying to users and your customer support executive
+          example: Customer returned the product
+        metadata:
+          maxLength: 255
+          type: object
+          description: "You can specify up to 50 keys, with key names up to 40 characters\
+            \ long and values up to 500 characters long. Metadata is useful for storing\
+            \ additional, structured information on an object."
+          example:
+            city: NY
+            unit: "245"
+    RefundsObject:
+      required:
+      - amount
+      - currency
+      - payment_id
+      - refund_id
+      - status
+      type: object
+      properties:
+        amount:
+          minimum: 1
+          type: integer
+          description: |
+            The refund amount, which should be less than or equal to the total payment amount. Amount for the payment in lowest denomination of the currency. (i.e) in cents for USD denomination, in paisa for INR denomination etc.,
+          example: 6540
+        refund_id:
+          maxLength: 30
+          minLength: 30
+          type: string
+          description: |
+            Unique Identifier for the Refund. This is to ensure idempotency for multiple partial refund initiated against the same payment.
+            If the identifiers is not defined by the merchant, this filed shall be auto generated and provide in the API response.
+            It is recommended to generate uuid(v4) as the refund_id.
+          example: ref_mbabizu24mvu3mela5njyhpit4
+        payment_id:
+          maxLength: 30
+          type: string
+          description: |
+            Unique Identifier for the Payment. It is always recommended to provide this ID while creating a payment.
+            If the identifiers in not provided in the Payment Request, this filed shall be auto generated and provide in the API response. It is suggested to keep the payment_id length as a maximum of 30 alphanumeric characters irrespective of payment methods and gateways.
+            Sequential and only numeric characters are not recommended.
+          example: pay_mbabizu24mvu3mela5njyhpit4
+        currency:
+          maxLength: 3
+          minLength: 3
+          type: string
+          description: |
+            The three-letter ISO currency code
+          example: USD
+        reason:
+          maxLength: 255
+          type: string
+          description: An arbitrary string attached to the object. Often useful for
+            displaying to users and your customer support executive
+          example: Customer returned the product
+        metadata:
+          maxLength: 255
+          type: object
+          description: "You can specify up to 50 keys, with key names up to 40 characters\
+            \ long and values up to 500 characters long. Metadata is useful for storing\
+            \ additional, structured information on an object."
+          example:
+            city: NY
+            unit: "245"
+      example:
+        reason: Customer returned the product
+        amount: 6540
+        metadata:
+          city: NY
+          unit: "245"
+        payment_id: pay_mbabizu24mvu3mela5njyhpit4
+        currency: USD
+        refund_id: ref_mbabizu24mvu3mela5njyhpit4
+    RefundResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/RefundResponse_inner'
+    CardData:
+      type: object
+      properties:
+        card_number:
+          maxLength: 30
+          minLength: 30
+          type: string
+          description: The card number
+          example: "4242424242424242"
+        card_exp_month:
+          maxLength: 2
+          minLength: 2
+          type: string
+          description: The expiry month for the card
+          example: "10"
+        card_exp_year:
+          maxLength: 2
+          minLength: 2
+          type: string
+          description: Expiry year for the card
+          example: "25"
+        card_holder_name:
+          maxLength: 255
+          minLength: 1
+          type: string
+          description: The name of card holder
+          example: John Doe
+        card_cvc:
+          maxLength: 4
+          minLength: 3
+          type: string
+          description: The cvc number
+          example: "123"
+        card_token:
+          maxLength: 30
+          minLength: 30
+          type: string
+          description: The token provided against a user's saved card. The token would
+            be valid for 15 minutes.
+          example: tkn_78892490hfh3r834rd
+      description: Card Data
+    CardPaymentMethodRequest:
+      type: object
+      properties:
+        card_number:
+          maxLength: 30
+          minLength: 30
+          type: string
+          description: The card number
+          example: "4242424242424242"
+        card_exp_month:
+          maxLength: 2
+          minLength: 2
+          type: string
+          description: The expiry month for the card
+          example: "10"
+        card_exp_year:
+          maxLength: 2
+          minLength: 2
+          type: string
+          description: Expiry year for the card
+          example: "25"
+        card_holder_name:
+          maxLength: 255
+          minLength: 1
+          type: string
+          description: The name of card holder
+          example: John Doe
+      description: Card Payment Method Information
+    CardPaymentMethodResponse:
+      type: object
+      properties:
+        last4_digits:
+          type: string
+          description: The last four digits of the case which could be displayed to
+            the end user for identification.
+          example: xxxxxxxxxxxx4242
+        card_exp_month:
+          maxLength: 2
+          minLength: 2
+          type: string
+          description: The expiry month for the card
+          example: "10"
+        card_exp_year:
+          maxLength: 2
+          minLength: 2
+          type: string
+          description: Expiry year for the card
+          example: "25"
+        card_holder_name:
+          maxLength: 255
+          type: string
+          description: The name of card holder
+          example: John Doe
+        card_token:
+          maxLength: 30
+          minLength: 30
+          type: string
+          description: The token provided against a user's saved card. The token would
+            be valid for 15 minutes.
+          example: tkn_78892490hfh3r834rd
+        scheme:
+          type: string
+          description: The card scheme network for the particular card
+          example: MASTER
+        issuer_country:
+          maxLength: 2
+          minLength: 2
+          type: string
+          description: The country code in in which the card was issued
+          example: US
+        card_fingerprint:
+          maxLength: 30
+          minLength: 30
+          type: string
+          description: A unique identifier alias to identify a particular card.
+          example: fpt_78892490hfh3r834rd
+      description: Card Payment Method object
+      example:
+        issuer_country: US
+        card_exp_year: "25"
+        card_fingerprint: fpt_78892490hfh3r834rd
+        last4_digits: xxxxxxxxxxxx4242
+        card_holder_name: John Doe
+        scheme: MASTER
+        card_token: tkn_78892490hfh3r834rd
+        card_exp_month: "10"
+    MerchantAccountCreateRequest:
+      required:
+      - merchant_id
+      type: object
+      properties:
+        merchant_id:
+          maxLength: 255
+          type: string
+          description: The identifier for the Merchant Account.
+          example: y3oqhf46pyzuxjbcn2giaqnb44
+        merchant_name:
+          type: string
+          description: Name of the merchant
+          example: NewAge Retailer
+        merchant_details:
+          $ref: '#/components/schemas/MerchantDetails'
+        return_url:
+          maxLength: 255
+          type: string
+          description: The URL to redirect after the completion of the operation
+          example: www.example.com/success
+        webhook_details:
+          $ref: '#/components/schemas/WebhookDetails'
+        routing_algorithm:
+          maxLength: 255
+          type: string
+          description: The routing algorithm to be used to process the incoming request
+            from merchant to outgoing payment processor or payment method. The default
+            is CUSTOM if
+          example: custom
+          enum:
+          - round_robin
+          - max_conversion
+          - min_cost
+          - custom
+        custom_routing_rules:
+          $ref: '#/components/schemas/ArrayOfRoutingRules'
+        sub_merchants_enabled:
+          maxLength: 255
+          type: boolean
+          description: "A boolean value to indicate if the merchant is a sub-merchant\
+            \ under a master or a parent merchant. By default, its value is false."
+          example: false
+        parent_merchant_id:
+          maxLength: 255
+          type: string
+          description: Refers to the Parent Merchant ID if the merchant being created
+            is a sub-merchant
+          example: xkkdf909012sdjki2dkh5sdf
+        metadata:
+          maxLength: 255
+          type: object
+          description: "You can specify up to 50 keys, with key names up to 40 characters\
+            \ long and values up to 500 characters long. Metadata is useful for storing\
+            \ additional, structured information on an object."
+          example:
+            city: NY
+            unit: "245"
+      description: The Merchant Account details
+    MerchantAccountUpdateRequest:
+      required:
+      - merchant_id
+      type: object
+      properties:
+        merchant_id:
+          maxLength: 255
+          type: string
+          description: The identifier for the Merchant Account.
+          example: y3oqhf46pyzuxjbcn2giaqnb44
+        merchant_name:
+          type: string
+          description: Name of the merchant
+          example: NewAge Retailer
+        merchant_details:
+          $ref: '#/components/schemas/MerchantDetails'
+        return_url:
+          maxLength: 255
+          type: string
+          description: The URL to redirect after the completion of the operation
+          example: www.example.com/success
+        webhook_details:
+          $ref: '#/components/schemas/WebhookDetails'
+        routing_algorithm:
+          maxLength: 255
+          type: string
+          description: The routing algorithm to be used to process the incoming request
+            from merchant to outgoing payment processor or payment method. The default
+            is CUSTOM if
+          example: custom
+          enum:
+          - round_robin
+          - max_conversion
+          - min_cost
+          - custom
+        custom_routing_rules:
+          $ref: '#/components/schemas/ArrayOfRoutingRules'
+        sub_merchants_enabled:
+          maxLength: 255
+          type: boolean
+          description: "A boolean value to indicate if the merchant is a sub-merchant\
+            \ under a master or a parent merchant. By default, its value is false."
+          example: false
+        parent_merchant_id:
+          maxLength: 255
+          type: string
+          description: Refers to the Parent Merchant ID if the merchant being created
+            is a sub-merchant
+          example: xkkdf909012sdjki2dkh5sdf
+        metadata:
+          maxLength: 255
+          type: object
+          description: "You can specify up to 50 keys, with key names up to 40 characters\
+            \ long and values up to 500 characters long. Metadata is useful for storing\
+            \ additional, structured information on an object."
+          example:
+            city: NY
+            unit: "245"
+      description: The Merchant Account details to be updated
+    MerchantAccountResponse:
+      required:
+      - merchant_id
+      type: object
+      properties:
+        merchant_id:
+          maxLength: 255
+          type: string
+          description: The identifier for the Merchant Account.
+          example: y3oqhf46pyzuxjbcn2giaqnb44
+        api_key:
+          maxLength: 255
+          type: string
+          description: The public security key for accessing the APIs
+          example: xkkdf909012sdjki2dkh5sdf
+        merchant_name:
+          type: string
+          description: Name of the merchant
+          example: NewAge Retailer
+        merchant_details:
+          $ref: '#/components/schemas/MerchantDetails'
+        webhook_details:
+          $ref: '#/components/schemas/WebhookDetails'
+        routing_algorithm:
+          maxLength: 255
+          type: string
+          description: The routing algorithm to be used to process the incoming request
+            from merchant to outgoing payment processor or payment method. The default
+            is CUSTOM if
+          example: custom
+          enum:
+          - round_robin
+          - max_conversion
+          - min_cost
+          - custom
+        custom_routing_rules:
+          $ref: '#/components/schemas/ArrayOfRoutingRules'
+        sub_merchants_enabled:
+          maxLength: 255
+          type: boolean
+          description: "A boolean value to indicate if the merchant is a sub-merchant\
+            \ under a master or a parent merchant. By default, its value is false."
+          example: false
+        parent_merchant_id:
+          maxLength: 255
+          type: string
+          description: Refers to the Parent Merchant ID if the merchant being created
+            is a sub-merchant
+          example: xkkdf909012sdjki2dkh5sdf
+        metadata:
+          maxLength: 255
+          type: object
+          description: "You can specify up to 50 keys, with key names up to 40 characters\
+            \ long and values up to 500 characters long. Metadata is useful for storing\
+            \ additional, structured information on an object."
+          example:
+            city: NY
+            unit: "245"
+      description: Merchant Account
+      example:
+        metadata:
+          city: NY
+          unit: "245"
+        merchant_details:
+          website: www.example.com
+          address:
+            zip: "560095"
+            country: IN
+            city: Bangalore
+            state: Karnataka
+            line3: Stallion
+            line2: Koramangala
+            line1: Juspay Router
+          secondary_phone: "9999999998"
+          primary_contact_person: John Test
+          primary_email: JohnTest@test.com
+          secondary_email: JohnTest2@test.com
+          about_business: Online Retail with a wide selection of organic products
+            for North America
+          secondary_contact_person: John Test2
+          primary_phone: "9999999999"
+        api_key: xkkdf909012sdjki2dkh5sdf
+        routing_algorithm: custom
+        merchant_name: NewAge Retailer
+        custom_routing_rules:
+        - - payment_method_types_incl:
+            - credit_card
+            connectors_pecking_order:
+            - stripe
+            - adyen
+            - brain_tree
+          - payment_method_types_incl:
+            - debit_card
+            connectors_traffic_weightage_key:
+            - stripe
+            - adyen
+            - brain_tree
+            connectors_traffic_weightage_value:
+            - 50
+            - 30
+            - 20
+        - - payment_method_types_incl:
+            - credit_card
+            connectors_pecking_order:
+            - stripe
+            - adyen
+            - brain_tree
+          - payment_method_types_incl:
+            - debit_card
+            connectors_traffic_weightage_key:
+            - stripe
+            - adyen
+            - brain_tree
+            connectors_traffic_weightage_value:
+            - 50
+            - 30
+            - 20
+        sub_merchants_enabled: false
+        parent_merchant_id: xkkdf909012sdjki2dkh5sdf
+        merchant_id: y3oqhf46pyzuxjbcn2giaqnb44
+        webhook_details:
+          webhook_password: password_ekart@123
+          webhook_version: 1.0.1
+          payment_succeeded_enabled: true
+          payment_created_enabled: true
+          payment_failed_enabled: true
+          webhook_username: ekart_retail
+    MerchantAccountDeleteResponse:
+      required:
+      - deleted
+      - merchant_id
+      type: object
+      properties:
+        merchant_id:
+          maxLength: 255
+          type: string
+          description: The identifier for the MerchantAccount object.
+          example: y3oqhf46pyzuxjbcn2giaqnb44
+        deleted:
+          type: boolean
+          description: Indicates the deletion status of the Merchant Account object.
+          example: true
+      description: Merchant Account
+      example:
+        deleted: true
+        merchant_id: y3oqhf46pyzuxjbcn2giaqnb44
+    PaymentConnectorCreateRequest:
+      required:
+      - connector_name
+      - connector_type
+      - merchant_id
+      type: object
+      properties:
+        merchant_id:
+          maxLength: 255
+          type: string
+          description: The identifier for the Merchant Account.
+          example: y3oqhf46pyzuxjbcn2giaqnb44
+        connector_type:
+          $ref: '#/components/schemas/ConnectorType'
+        connector_name:
+          $ref: '#/components/schemas/PaymentConnector'
+        connector_account_details:
+          type: object
+          description: "Account details of the Connector. You can specify up to 50\
+            \ keys, with key names up to 40 characters long and values up to 500 characters\
+            \ long. Useful for storing additional, structured information on an object."
+          example:
+            api_key: Basic MyVerySecretApiKey
+        test_mode:
+          type: boolean
+          description: "A boolean value to indicate if the connector is in Test mode.\
+            \ By default, its value is false."
+          example: false
+        disabled:
+          type: boolean
+          description: "A boolean value to indicate if the connector is disabled.\
+            \ By default, its value is false."
+          example: false
+        payment_methods_enabled:
+          $ref: '#/components/schemas/PaymentMethodsEnabled'
+        metadata:
+          maxLength: 255
+          type: object
+          description: "You can specify up to 50 keys, with key names up to 40 characters\
+            \ long and values up to 500 characters long. Metadata is useful for storing\
+            \ additional, structured information on an object."
+          example:
+            city: NY
+            unit: "245"
+      description: The Payment Connector details
+    PaymentConnectorUpdateRequest:
+      required:
+      - connector_id
+      - connector_name
+      - connector_type
+      - merchant_id
+      type: object
+      properties:
+        merchant_id:
+          maxLength: 255
+          type: string
+          description: The identifier for the Merchant Account.
+          example: y3oqhf46pyzuxjbcn2giaqnb44
+        connector_type:
+          $ref: '#/components/schemas/ConnectorType'
+        connector_name:
+          $ref: '#/components/schemas/PaymentConnector'
+        connector_id:
+          type: integer
+          description: Unique ID of the connector
+        connector_account_details:
+          type: object
+          description: "Account details of the Connector. You can specify up to 50\
+            \ keys, with key names up to 40 characters long and values up to 500 characters\
+            \ long. Useful for storing additional, structured information on an object."
+          example:
+            processing_fee: 2.0%
+            billing_currency: USD
+        test_mode:
+          type: boolean
+          description: "A boolean value to indicate if the connector is in Test mode.\
+            \ By default, its value is false."
+          example: false
+        disabled:
+          type: boolean
+          description: "A boolean value to indicate if the connector is disabled.\
+            \ By default, its value is false."
+          example: false
+        payment_methods:
+          $ref: '#/components/schemas/PaymentMethodsEnabled'
+        metadata:
+          maxLength: 255
+          type: object
+          description: "You can specify up to 50 keys, with key names up to 40 characters\
+            \ long and values up to 500 characters long. Metadata is useful for storing\
+            \ additional, structured information on an object."
+          example:
+            city: NY
+            unit: "245"
+      description: The Payment Connector Update Request
+    PaymentConnectorResponse:
+      required:
+      - connector_id
+      - connector_name
+      - connector_type
+      - merchant_id
+      type: object
+      properties:
+        merchant_id:
+          maxLength: 255
+          type: string
+          description: The identifier for the Merchant Account.
+          example: y3oqhf46pyzuxjbcn2giaqnb44
+        connector_type:
+          $ref: '#/components/schemas/ConnectorType'
+        connector_name:
+          $ref: '#/components/schemas/PaymentConnector'
+        connector_id:
+          type: integer
+          description: Unique ID of the connector
+          example: 12
+        connector_account_details:
+          type: object
+          description: "Account details of the Connector. You can specify up to 50\
+            \ keys, with key names up to 40 characters long and values up to 500 characters\
+            \ long. Useful for storing additional, structured information on an object."
+          example:
+            processing_fee: 2.0%
+            billing_currency: USD
+        test_mode:
+          type: boolean
+          description: "A boolean value to indicate if the connector is in Test mode.\
+            \ By default, its value is false."
+          example: false
+        disabled:
+          type: boolean
+          description: "A boolean value to indicate if the connector is disabled.\
+            \ By default, its value is false."
+          example: false
+        payment_methods:
+          $ref: '#/components/schemas/PaymentMethodsEnabled'
+        metadata:
+          maxLength: 255
+          type: object
+          description: "You can specify up to 50 keys, with key names up to 40 characters\
+            \ long and values up to 500 characters long. Metadata is useful for storing\
+            \ additional, structured information on an object."
+          example:
+            city: NY
+            unit: "245"
+      description: The Payment Connector Response details
+      example:
+        payment_methods:
+        - payment_method_types:
+          - credit_card
+          - credit_card
+          payment_method_issuers:
+          - "[\"HDFC\"]"
+          - "[\"HDFC\"]"
+          installment_payment_enabled: true
+          accepted_countries:
+          - US
+          - US
+          maximum_amount: 0
+          payment_schemes:
+          - VISA
+          - VISA
+          minimum_amount: 1
+          payment_experience:
+          - redirect_to_url
+          payment_method: payment_method
+          accepted_currencies:
+          - USD
+          - USD
+          recurring_enabled: true
+        - payment_method_types:
+          - credit_card
+          - credit_card
+          payment_method_issuers:
+          - "[\"HDFC\"]"
+          - "[\"HDFC\"]"
+          installment_payment_enabled: true
+          accepted_countries:
+          - US
+          - US
+          maximum_amount: 0
+          payment_schemes:
+          - VISA
+          - VISA
+          minimum_amount: 1
+          payment_experience:
+          - redirect_to_url
+          payment_method: payment_method
+          accepted_currencies:
+          - USD
+          - USD
+          recurring_enabled: true
+        metadata:
+          city: NY
+          unit: "245"
+        test_mode: false
+        connector_type: connector_type
+        connector_id: 12
+        connector_account_details:
+          processing_fee: 2.0%
+          billing_currency: USD
+        disabled: false
+        merchant_id: y3oqhf46pyzuxjbcn2giaqnb44
+        connector_name: connector_name
+    PaymentConnectorDeleteResponse:
+      required:
+      - connector_id
+      - deleted
+      - merchant_id
+      type: object
+      properties:
+        merchant_id:
+          maxLength: 255
+          type: string
+          description: The identifier for the Merchant Account
+          example: y3oqhf46pyzuxjbcn2giaqnb44
+        connector_id:
+          type: integer
+          description: The identifier for the Payment Connector
+          example: 10
+        deleted:
+          type: boolean
+          description: Indicates the deletion status of the Merchant Account object.
+          example: true
+      description: Payment Connector Delete Response
+      example:
+        deleted: true
+        connector_id: 10
+        merchant_id: y3oqhf46pyzuxjbcn2giaqnb44
+    ConnectorType:
+      type: string
+      description: Type of the connector
+      enum:
+      - payment_processor
+      - payment_vas
+      - fin_operations
+      - fiz_operations
+      - networks
+      - banking_entities
+      - non_banking_finance
+    PaymentMethodsEnabled:
+      type: array
+      description: Details of all the payment methods enabled for the connector for
+        the given merchant account
+      items:
+        $ref: '#/components/schemas/PaymentMethodsEnabled_inner'
+      x-schema-name: PaymentMethodsEnabled
+    PaymentSchemes:
+      type: string
+      description: Represent the payment schemes and networks
+      enum:
+      - VISA
+      - MasterCard
+      - Discover
+      - AMEX
+    MerchantDetails:
+      type: object
+      properties:
+        primary_contact_person:
+          maxLength: 255
+          type: string
+          description: The merchant's primary contact name
+          example: John Test
+        primary_email:
+          maxLength: 255
+          type: string
+          description: The merchant's primary email address
+          format: email
+          example: JohnTest@test.com
+        primary_phone:
+          maxLength: 255
+          type: string
+          description: The merchant's primary phone number
+          example: "9999999999"
+        secondary_contact_person:
+          maxLength: 255
+          type: string
+          description: The merchant's secondary contact name
+          example: John Test2
+        secondary_email:
+          maxLength: 255
+          type: string
+          description: The merchant's secondary email address
+          format: email
+          example: JohnTest2@test.com
+        secondary_phone:
+          maxLength: 255
+          type: string
+          description: The merchant's secondary phone number
+          example: "9999999998"
+        website:
+          maxLength: 255
+          type: string
+          description: The business website of the merchant
+          example: www.example.com
+        about_business:
+          maxLength: 255
+          type: string
+          description: A brief description about merchant's business
+          example: Online Retail with a wide selection of organic products for North
+            America
+        address:
+          $ref: '#/components/schemas/Address'
+      example:
+        website: www.example.com
+        address:
+          zip: "560095"
+          country: IN
+          city: Bangalore
+          state: Karnataka
+          line3: Stallion
+          line2: Koramangala
+          line1: Juspay Router
+        secondary_phone: "9999999998"
+        primary_contact_person: John Test
+        primary_email: JohnTest@test.com
+        secondary_email: JohnTest2@test.com
+        about_business: Online Retail with a wide selection of organic products for
+          North America
+        secondary_contact_person: John Test2
+        primary_phone: "9999999999"
+    WebhookDetails:
+      type: object
+      properties:
+        webhook_version:
+          maxLength: 255
+          type: string
+          description: The version for Webhook
+          example: 1.0.1
+        webhook_username:
+          maxLength: 255
+          type: string
+          description: The user name for Webhook login
+          example: ekart_retail
+        webhook_password:
+          maxLength: 255
+          type: string
+          description: The password for Webhook login
+          example: password_ekart@123
+        payment_created_enabled:
+          type: boolean
+          description: "If this property is true, a webhook message is posted whenever\
+            \ a new payment is created"
+          example: true
+        payment_succeeded_enabled:
+          type: boolean
+          description: "If this property is true, a webhook message is posted whenever\
+            \ a payment is successful"
+          example: true
+        payment_failed_enabled:
+          type: boolean
+          description: "If this property is true, a webhook message is posted whenever\
+            \ a payment fails"
+          example: true
+      example:
+        webhook_password: password_ekart@123
+        webhook_version: 1.0.1
+        payment_succeeded_enabled: true
+        payment_created_enabled: true
+        payment_failed_enabled: true
+        webhook_username: ekart_retail
+    ArrayOfRoutingRules:
+      type: array
+      items:
+        $ref: '#/components/schemas/ArrayOfRoutingRules_inner'
+      x-schema-name: ArrayOfRoutingRules
+    PaymentMethod:
+      type: string
+      example: card
+      enum:
+      - card
+      - wallet
+      - bank_debit
+      - bank_redirect
+      - bank_transfer
+    PaymentMethodType:
+      type: string
+      example: credit_card
+      enum:
+      - credit_card
+      - debit_card
+      - upi_intent
+      - upi_collect
+    CountryISO:
+      maxLength: 2
+      minLength: 2
+      type: string
+      description: The two-letter ISO currency code
+      example: US
+    CurrencyISO:
+      maxLength: 3
+      minLength: 3
+      type: string
+      description: The three-letter ISO currency code
+      example: USD
+    PaymentConnector:
+      type: string
+      description: Unique name used for identifying the Connector
+      example: stripe
+      enum:
+      - stripe
+      - adyen
+      - brain_tree
+      - dlocal
+      - cyber_source
+    TrafficWeightage:
+      maximum: 100
+      minimum: 0
+      type: integer
+      example: 50
+    NextAction:
+      type: object
+      properties:
+        redirect_to_url:
+          type: string
+          description: The URL to which the customer needs to be redirected for completing
+            the payment.
+          example: https://pg-redirect-page.com
+        display_qr_code:
+          type: string
+          description: The QR code data to be displayed to the customer.
+          example: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADUAAAA1AQAAAADJnZ7dAAABs0lEQVR4nAGoAVf+AgFqqzCrHAACfO2eCXLx8ALIuWcFE2AgAgDMJY+7KAACAMP1N48IAAI4wJ9v8kDgAoT27OLpdxAC/g8wHJSz+ALG5FSP+HnIAt7Si9v6m+AC+hZxUPoJWAKN7C4q3rTAAi/TeN30+6ACMYHnWkM8uALzviwJR9UIAs36kzcuuqACxsgBlqjsSAJrqdLoS4QAAimoq+YS7zgCM3EsnwNXeALqzAWMrDxgAnp3ZKuU/qACbmkC+I8riALKwNCjMUMoAs3w0GTalKgCdysPb"
+        invoke_payment_app:
+          type: object
+          description: Contains the data for invoking the sdk client for completing
+            the payment.
+          example:
+            intent_uri: upi://pay?pa=hhferf@abc&pn=merchant%20com&mc=5815&tid=pnf20200807108614390166&tr=20200807108614390166&tn=Transaction_Note&am=1&cu=INR
+        invoke_sdk_client:
+          type: object
+          description: Contains the data for invoking the sdk client for completing
+            the payment.
+          example:
+            sdk_name: gpay
+            sdk_params:
+              param1: value
+              param2: value
+            intent_uri: upi://pay?pa=hhferf@abc&pn=merchant%20com&mc=5815&tid=pnf20200807108614390166&tr=20200807108614390166&tn=Transaction_Note&am=1&cu=INR
+        trigger_api:
+          type: object
+          description: "Provides the instructions on the next API to be triggered\
+            \ to complete the payment. This is applicable in cases wherein the merchant\
+            \ has to display a UI to the user for collecting information such as OTP,\
+            \ 2factor authentication details."
+          example:
+            api_name: submit_otp
+            doc: https://router.juspay.io/api-reference/submit_otp
+      description: States the next action to complete the payment
+      example:
+        redirect_to_url: https://pg-redirect-page.com
+        display_qr_code: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADUAAAA1AQAAAADJnZ7dAAABs0lEQVR4nAGoAVf+AgFqqzCrHAACfO2eCXLx8ALIuWcFE2AgAgDMJY+7KAACAMP1N48IAAI4wJ9v8kDgAoT27OLpdxAC/g8wHJSz+ALG5FSP+HnIAt7Si9v6m+AC+hZxUPoJWAKN7C4q3rTAAi/TeN30+6ACMYHnWkM8uALzviwJR9UIAs36kzcuuqACxsgBlqjsSAJrqdLoS4QAAimoq+YS7zgCM3EsnwNXeALqzAWMrDxgAnp3ZKuU/qACbmkC+I8riALKwNCjMUMoAs3w0GTalKgCdysPb"
+        invoke_payment_app:
+          intent_uri: upi://pay?pa=hhferf@abc&pn=merchant%20com&mc=5815&tid=pnf20200807108614390166&tr=20200807108614390166&tn=Transaction_Note&am=1&cu=INR
+        trigger_api:
+          api_name: submit_otp
+          doc: https://router.juspay.io/api-reference/submit_otp
+        invoke_sdk_client:
+          sdk_name: gpay
+          sdk_params:
+            param1: value
+            param2: value
+          intent_uri: upi://pay?pa=hhferf@abc&pn=merchant%20com&mc=5815&tid=pnf20200807108614390166&tr=20200807108614390166&tn=Transaction_Note&am=1&cu=INR
+    PhoneNumber:
+      type: string
+      description: Phone number
+    Timestamp:
+      type: string
+      description: ISO 8601 timestamp
+      format: date-time
+    ApiAuthenticationError:
+      type: object
+      properties:
+        code:
+          maxLength: 200
+          type: string
+          description: The error code
+          example: invalid_api_request
+        message:
+          maxLength: 255
+          type: string
+          description: "Description of the error, with rectification steps/ reference\
+            \ links to docs"
+          example: "Access forbidden, invalid api-key was used"
+        type:
+          maxLength: 200
+          type: string
+          description: The category to which the error belongs
+          example: invalid_request_error
+    ObjectNotFoundError:
+      type: object
+      properties:
+        code:
+          maxLength: 200
+          type: string
+          description: The error code
+          example: object_not_found
+        message:
+          maxLength: 255
+          type: string
+          description: "Description of the error, with rectification steps/ reference\
+            \ links to docs"
+          example: Customer does not exist in records
+        type:
+          maxLength: 200
+          type: string
+          description: The category to which the error belongs
+          example: object_not_found
+    BadRequestError:
+      type: object
+      properties:
+        code:
+          maxLength: 255
+          type: string
+          description: The error code
+          example: parameter_missing
+        message:
+          maxLength: 255
+          type: string
+          description: "Missing required param: <parameter_name>"
+          example: "Missing required param: amount"
+        type:
+          maxLength: 255
+          type: string
+          description: The category to which the error belongs
+          example: invalid_request_error
+    Error:
+      type: object
+      properties:
+        code:
+          maxLength: 255
+          type: string
+          description: The error code
+          example: parameter_missing
+        message:
+          maxLength: 255
+          type: string
+          description: "Missing required param: <parameter_name>"
+          example: "Missing required param: amount"
+        type:
+          maxLength: 255
+          type: string
+          description: The category to which the error belongs
+          example: invalid_request_error
+    inline_response_200:
+      type: object
+      properties:
+        mandate_id:
+          type: string
+          description: |
+            The unique id corresponding to the mandate.
+          example: mandate_end38934n12s923d0
+        status:
+          type: string
+          description: The status of the mandate.
+          example: revoked
+      example:
+        mandate_id: mandate_end38934n12s923d0
+        status: revoked
+    payments_body:
+      oneOf:
+      - $ref: '#/components/schemas/PaymentsCreateRequest'
+    inline_response_200_1:
+      oneOf:
+      - $ref: '#/components/schemas/PaymentsCreateResponse'
+    ArrayOfMerchantPaymentMethods_inner:
+      properties:
+        payment_method:
+          $ref: '#/components/schemas/PaymentMethod'
+        payment_method_types:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentMethodType'
+        payment_method_issuers:
+          type: array
+          description: List of payment method issuers to be enabled for this payment
+            method
+          items:
+            type: string
+            example: "[\"CHASE\",\"WELLS_FARGO\"]"
+        payment_method_issuer_codes:
+          type: string
+          description: |
+            A standard code representing the issuer of payment method
+          example: "[\"PM_CHASE\",\"PM_WELLS\"]"
+        payment_schemes:
+          type: array
+          description: List of payment schemes accepted or has the processing capabilities
+            of the processor
+          items:
+            $ref: '#/components/schemas/PaymentSchemes'
+        accepted_currencies:
+          type: array
+          description: List of currencies accepted or has the processing capabilities
+            of the processor
+          items:
+            $ref: '#/components/schemas/CurrencyISO'
+        accepted_countries:
+          type: array
+          description: List of Countries accepted or has the processing capabilities
+            of the processor
+          items:
+            $ref: '#/components/schemas/CountryISO'
+        minimum_amount:
+          type: integer
+          description: "Minimum amount supported by the processor. To be represented\
+            \ in the lowest denomination of the target currency (For example, for\
+            \ USD it should be in cents)"
+          example: 1
+        maximum_amount:
+          type: integer
+          description: "Maximum amount supported by the processor. To be represented\
+            \ in the lowest denomination of the target currency (For example, for\
+            \ USD it should be in cents)"
+          example: null
+        recurring_enabled:
+          type: boolean
+          description: Boolean to enable recurring payments / mandates. Default is
+            true.
+          example: true
+        installment_payment_enabled:
+          type: boolean
+          description: Boolean to enable installment / EMI / BNPL payments. Default
+            is true.
+          example: true
+        payment_experience:
+          type: array
+          description: Type of payment experience enabled with the connector
+          example:
+          - redirect_to_url
+          items:
+            $ref: '#/components/schemas/NextAction'
+      example:
+        payment_method_types:
+        - credit_card
+        - credit_card
+        payment_method_issuers:
+        - "[\"CHASE\",\"WELLS_FARGO\"]"
+        - "[\"CHASE\",\"WELLS_FARGO\"]"
+        installment_payment_enabled: true
+        accepted_countries:
+        - US
+        - US
+        maximum_amount: 0
+        payment_schemes:
+        - VISA
+        - VISA
+        minimum_amount: 1
+        payment_experience:
+        - redirect_to_url
+        payment_method: payment_method
+        payment_method_issuer_codes: "[\"PM_CHASE\",\"PM_WELLS\"]"
+        accepted_currencies:
+        - USD
+        - USD
+        recurring_enabled: true
+    PaymentsCreateRequest_mandate_data:
+      type: object
+      properties:
+        customer_acceptance:
+          $ref: '#/components/schemas/CustomerAcceptance'
+      description: This hash contains details about the Mandate to create. This parameter
+        can only be used with confirm=true.
+      example:
+        customer_acceptance:
+          acceptance_type: online
+          online:
+            ip_address: 127.0.0.1
+            user_agent: device
+          accepted_at: 2000-01-23T04:56:07.000+00:00
+    PaymentsCreateRequest_payment_method_data:
+      type: object
+      properties:
+        card:
+          type: object
+          description: payment card
+          oneOf:
+          - $ref: '#/components/schemas/CardData'
+      description: The payment method information
+    RefundResponse_inner:
+      type: object
+      properties:
+        amount:
+          minimum: 1
+          type: integer
+          description: |
+            The refund amount, which should be less than or equal to the total payment amount. Amount for the payment in lowest denomination of the currency. (i.e) in cents for USD denomination, in paisa for INR denomination etc.,
+          example: 6540
+        refund_id:
+          maxLength: 30
+          minLength: 30
+          type: string
+          description: |
+            Unique Identifier for the Refund. This is to ensure idempotency for multiple partial refund initiated against the same payment.
+            If the identifiers is not defined by the merchant, this filed shall be auto generated and provide in the API response.
+            It is recommended to generate uuid(v4) as the refund_id.
+          example: ref_mbabizu24mvu3mela5njyhpit4
+        payment_id:
+          maxLength: 30
+          minLength: 30
+          type: string
+          description: |
+            Unique Identifier for the Payment. It is always recommended to provide this ID while creating a payment.
+            If the identifiers in not provided in the Payment Request, this filed shall be auto generated and provide in the API response. It is suggested to keep the payment_id length as a maximum of 30 alphanumeric characters irrespective of payment methods and gateways.
+            Sequential and only numeric characters are not recommended.
+          example: pay_mbabizu24mvu3mela5njyhpit4
+        currency:
+          maxLength: 3
+          minLength: 3
+          type: string
+          description: |
+            The three-letter ISO currency code
+          example: USD
+        reason:
+          maxLength: 255
+          type: string
+          description: An arbitrary string attached to the object. Often useful for
+            displaying to users and your customer support executive
+          example: Customer returned the product
+        metadata:
+          maxLength: 255
+          type: object
+          description: "You can specify up to 50 keys, with key names up to 40 characters\
+            \ long and values up to 500 characters long. Metadata is useful for storing\
+            \ additional, structured information on an object."
+          example:
+            city: NY
+            unit: "245"
+    PaymentMethodsEnabled_inner:
+      properties:
+        payment_method:
+          $ref: '#/components/schemas/PaymentMethod'
+        payment_method_types:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentMethodType'
+        payment_method_issuers:
+          type: array
+          description: List of payment method issuers to be enabled for this payment
+            method
+          items:
+            type: string
+            example: "[\"HDFC\"]"
+        payment_schemes:
+          type: array
+          description: List of payment schemes accepted or has the processing capabilities
+            of the processor
+          items:
+            $ref: '#/components/schemas/PaymentSchemes'
+        accepted_currencies:
+          type: array
+          description: List of currencies accepted or has the processing capabilities
+            of the processor
+          items:
+            $ref: '#/components/schemas/CurrencyISO'
+        accepted_countries:
+          type: array
+          description: List of Countries accepted or has the processing capabilities
+            of the processor
+          items:
+            $ref: '#/components/schemas/CountryISO'
+        minimum_amount:
+          type: integer
+          description: "Minimum amount supported by the processor. To be represented\
+            \ in the lowest denomination of the target currency (For example, for\
+            \ USD it should be in cents)"
+          example: 1
+        maximum_amount:
+          type: integer
+          description: "Maximum amount supported by the processor. To be represented\
+            \ in the lowest denomination of the target currency (For example, for\
+            \ USD it should be in cents)"
+          example: null
+        recurring_enabled:
+          type: boolean
+          description: Boolean to enable recurring payments / mandates. Default is
+            true.
+          example: true
+        installment_payment_enabled:
+          type: boolean
+          description: Boolean to enable installment / EMI / BNPL payments. Default
+            is true.
+          example: true
+        payment_experience:
+          type: array
+          description: Type of payment experience enabled with the connector
+          example:
+          - redirect_to_url
+          items:
+            $ref: '#/components/schemas/NextAction'
+      example:
+        payment_method_types:
+        - credit_card
+        - credit_card
+        payment_method_issuers:
+        - "[\"HDFC\"]"
+        - "[\"HDFC\"]"
+        installment_payment_enabled: true
+        accepted_countries:
+        - US
+        - US
+        maximum_amount: 0
+        payment_schemes:
+        - VISA
+        - VISA
+        minimum_amount: 1
+        payment_experience:
+        - redirect_to_url
+        payment_method: payment_method
+        accepted_currencies:
+        - USD
+        - USD
+        recurring_enabled: true
+    ArrayOfRoutingRules_inner:
+      properties:
+        payment_methods_incl:
+          type: array
+          description: The List of payment methods to include for this routing rule
+          example:
+          - card
+          - upi
+          items:
+            $ref: '#/components/schemas/PaymentMethod'
+        payment_methods_excl:
+          type: array
+          description: "The List of payment methods to exclude for this routing rule.\
+            \ If there is conflict between include and exclude lists, include list\
+            \ overrides the exclude list."
+          example:
+          - card
+          - upi
+          items:
+            $ref: '#/components/schemas/PaymentMethod'
+        payment_method_types_incl:
+          type: array
+          description: The List of payment method types to include for this routing
+            rule
+          example:
+          - credit_card
+          - debit_card
+          items:
+            $ref: '#/components/schemas/PaymentMethodType'
+        payment_method_types_excl:
+          type: array
+          description: "The List of payment method types to exclude for this routing\
+            \ rule. If there is conflict between include and exclude lists, include\
+            \ list overrides the exclude list."
+          example:
+          - credit_card
+          - debit_card
+          items:
+            $ref: '#/components/schemas/PaymentMethodType'
+        payment_method_issuers_incl:
+          type: array
+          description: The List of payment method issuers to include for this routing
+            rule
+          example:
+          - Citibank
+          - JPMorgan
+          items:
+            type: string
+        payment_method_issuers_excl:
+          type: array
+          description: "The List of payment method issuers to exclude for this routing\
+            \ rule. If there is conflict between include and exclude lists, include\
+            \ list overrides the exclude list."
+          example:
+          - Citibank
+          - JPMorgan
+          items:
+            type: string
+        countries_incl:
+          type: array
+          description: The List of countries to include for this routing rule
+          example:
+          - US
+          - UK
+          - IN
+          items:
+            $ref: '#/components/schemas/CountryISO'
+        countries_excl:
+          type: array
+          description: "The List of countries to exclude for this routing rule. If\
+            \ there is conflict between include and exclude lists, include list overrides\
+            \ the exclude list."
+          example:
+          - US
+          - UK
+          - IN
+          items:
+            $ref: '#/components/schemas/CountryISO'
+        currencies_incl:
+          type: array
+          description: The List of currencies to include for this routing rule
+          example:
+          - USD
+          - EUR
+          items:
+            $ref: '#/components/schemas/CurrencyISO'
+        currencies_excl:
+          type: array
+          description: "The List of currencies to exclude for this routing rule. If\
+            \ there is conflict between include and exclude lists, include list overrides\
+            \ the exclude list."
+          example:
+          - AED
+          - SGD
+          items:
+            $ref: '#/components/schemas/CurrencyISO'
+        metadata_filters_keys:
+          type: array
+          description: List of Metadata Filters to apply for the Routing Rule. The
+            filters are presented as 2 arrays of keys and value. This property contains
+            all the keys.
+          example:
+          - payments.udf1
+          - payments.udf2
+          items:
+            type: string
+        metadata_filters_values:
+          type: array
+          description: List of Metadata Filters to apply for the Routing Rule. The
+            filters are presented as 2 arrays of keys and value. This property contains
+            all the keys.
+          example:
+          - android
+          - Category_Electronics
+          items:
+            type: string
+        connectors_pecking_order:
+          type: array
+          description: "The pecking order of payment connectors (or processors) to\
+            \ be used for routing. The first connector in the array will be attempted\
+            \ for routing. If it fails, the second connector will be used till the\
+            \ list is exhausted."
+          example:
+          - stripe
+          - adyen
+          - brain_tree
+          items:
+            $ref: '#/components/schemas/PaymentConnector'
+        connectors_traffic_weightage_key:
+          type: array
+          description: An Array of Connectors (as Keys) with the associated percentage
+            of traffic to be routed through the given connector (Expressed as an array
+            of values)
+          example:
+          - stripe
+          - adyen
+          - brain_tree
+          items:
+            $ref: '#/components/schemas/PaymentConnector'
+        connectors_traffic_weightage_value:
+          type: array
+          description: An Array of Weightage (expressed in percentage) that needs
+            to be associated with the respective connectors (Expressed as an array
+            of keys)
+          example:
+          - 50
+          - 30
+          - 20
+          items:
+            $ref: '#/components/schemas/TrafficWeightage'
+      example:
+      - payment_method_types_incl:
+        - credit_card
+        connectors_pecking_order:
+        - stripe
+        - adyen
+        - brain_tree
+      - payment_method_types_incl:
+        - debit_card
+        connectors_traffic_weightage_key:
+        - stripe
+        - adyen
+        - brain_tree
+        connectors_traffic_weightage_value:
+        - 50
+        - 30
+        - 20
+  parameters:
+    hash:
+      name: hash
+      in: path
+      description: The token identifier string
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+    mediaType:
+      name: Accept
+      in: header
+      description: The response media type
+      required: false
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: application/json
+        enum:
+        - application/json
+    systemEventType:
+      name: eventType
+      in: path
+      description: The event type
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+  securitySchemes:
+    ApiSecretKey:
+      type: apiKey
+      description: |
+        Unless explicitly stated, all endpoints require authentication using your secret key. You may generate your API keys from the Juspay Dashboard.
+        #### Format
+        - Sandbox `sk_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+        - Production `pk_xxxxxxxxxxxxxxxxxxxxxxxxxx`
+      name: api-key
+      in: header
+      x-cko-type: api-key
+    AdminSecretKey:
+      type: apiKey
+      description: |
+        Admin Key for managing Merchant Accounts and Payment Connectors In the OSS version - Developers can directly update the AdminSecretKey in the DB and start using the admin APIs to configure a new accounts and connectors In the Hosted version - The key can be obtained from the Dashboard or the Support team
+      name: admin-api-key
+      in: header
+      x-cko-type: admin-api-key
+x-tagGroups:
+- name: Quick Start
+  tags:
+  - QuickStart
+- name: Payments
+  tags:
+  - Payments
+- name: Customers
+  tags:
+  - Customers
+- name: Payment Methods
+  tags:
+  - PaymentMethods
+- name: Refunds
+  tags:
+  - Refunds
+- name: Mandates
+  tags:
+  - Mandates
+- name: Merchant Accounts
+  tags:
+  - MerchantAccounts
+- name: Payment Connectors
+  tags:
+  - PaymentConnectors
